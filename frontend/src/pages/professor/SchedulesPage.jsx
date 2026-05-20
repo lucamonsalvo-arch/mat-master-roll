@@ -4,7 +4,7 @@ import api from '../../lib/api';
 
 const DAYS = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
 const DAYS_SHORT = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
-const EMPTY = { class_type_id:'', professor_id:'', day_of_week:1, start_time:'19:00', end_time:'20:30', location:'Mat Principal' };
+const EMPTY = { class_type_id:'', professor_id:'', days:[], start_time:'19:00', end_time:'20:30', location:'Mat Principal' };
 
 export default function SchedulesPage() {
   const [schedules,  setSchedules]  = useState([]);
@@ -29,6 +29,7 @@ export default function SchedulesPage() {
 
   async function handleSave(e) {
     e.preventDefault();
+    if (form.days.length === 0) { setError('Seleccioná al menos un día'); return; }
     setSaving(true); setError('');
     try {
       await api.post('/api/schedules', form);
@@ -38,6 +39,13 @@ export default function SchedulesPage() {
     } catch (err) {
       setError(err.response?.data?.error || 'Error al guardar');
     } finally { setSaving(false); }
+  }
+
+  function toggleDay(idx) {
+    setForm(prev => ({
+      ...prev,
+      days: prev.days.includes(idx) ? prev.days.filter(d => d !== idx) : [...prev.days, idx],
+    }));
   }
 
   async function deleteSchedule(id) {
@@ -153,13 +161,20 @@ export default function SchedulesPage() {
                   {classTypes.map(ct=><option key={ct.id} value={ct.id}>{ct.name}</option>)}
                 </select>
               </div>
+              <div>
+                <label className="block text-xs text-gray-400 mb-2">Días * <span className="text-gray-600">(podés elegir varios)</span></label>
+                <div className="flex flex-wrap gap-2">
+                  {DAYS.map((d, i) => (
+                    <button key={i} type="button"
+                      onClick={() => toggleDay(i)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${form.days.includes(i) ? 'bg-red-600 text-white' : 'bg-gray-800 text-gray-400 hover:text-white'}`}>
+                      {DAYS_SHORT[i]}
+                    </button>
+                  ))}
+                </div>
+              </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs text-gray-400 mb-1">Día *</label>
-                  <select value={form.day_of_week} onChange={e=>setForm({...form,day_of_week:Number(e.target.value)})} className={INPUT}>
-                    {DAYS.map((d,i)=><option key={i} value={i}>{d}</option>)}
-                  </select>
-                </div>
                 <div>
                   <label className="block text-xs text-gray-400 mb-1">Lugar</label>
                   <input value={form.location} onChange={e=>setForm({...form,location:e.target.value})} className={INPUT}/>

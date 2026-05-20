@@ -27,13 +27,20 @@ router.get('/:id/students', requireProfessor, async (req, res) => {
 
 // POST /api/schedules
 router.post('/', requireProfessor, async (req, res) => {
-  const { class_type_id, day_of_week, start_time, end_time, location } = req.body;
+  const { class_type_id, start_time, end_time, location } = req.body;
   const professor_id = req.body.professor_id || null;
+  const days = Array.isArray(req.body.days) ? req.body.days : [req.body.day_of_week];
+
+  if (!days.length) return res.status(400).json({ error: 'Seleccioná al menos un día' });
+
+  const records = days.map(day_of_week => ({
+    class_type_id, professor_id, day_of_week, start_time, end_time, location,
+  }));
+
   const { data, error } = await supabase
     .from('schedules')
-    .insert({ class_type_id, professor_id, day_of_week, start_time, end_time, location })
-    .select('*, class_types(name,color)')
-    .single();
+    .insert(records)
+    .select('*, class_types(name,color)');
   if (error) return res.status(400).json({ error: error.message });
   res.status(201).json(data);
 });
