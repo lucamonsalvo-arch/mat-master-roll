@@ -27,7 +27,8 @@ router.get('/:id/students', requireProfessor, async (req, res) => {
 
 // POST /api/schedules
 router.post('/', requireProfessor, async (req, res) => {
-  const { class_type_id, professor_id, day_of_week, start_time, end_time, location } = req.body;
+  const { class_type_id, day_of_week, start_time, end_time, location } = req.body;
+  const professor_id = req.body.professor_id || null;
   const { data, error } = await supabase
     .from('schedules')
     .insert({ class_type_id, professor_id, day_of_week, start_time, end_time, location })
@@ -39,7 +40,8 @@ router.post('/', requireProfessor, async (req, res) => {
 
 // PUT /api/schedules/:id
 router.put('/:id', requireProfessor, async (req, res) => {
-  const { class_type_id, professor_id, day_of_week, start_time, end_time, location, active } = req.body;
+  const { class_type_id, day_of_week, start_time, end_time, location, active } = req.body;
+  const professor_id = req.body.professor_id || null;
   const { data, error } = await supabase
     .from('schedules')
     .update({ class_type_id, professor_id, day_of_week, start_time, end_time, location, active })
