@@ -18,7 +18,7 @@ export default function Sidebar({ links }) {
           <div className="w-10 h-10 bg-red-600 rounded-xl flex items-center justify-center text-xl">🥋</div>
           <div>
             <h1 className="font-black text-white text-sm leading-tight">Mat Master Roll</h1>
-            <p className="text-gray-500 text-xs capitalize">{user?.role}</p>
+            <p className="text-gray-500 text-xs">{user?.role === 'profesor' ? 'Professor' : 'Atleta'}</p>
           </div>
         </div>
       </div>

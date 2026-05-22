@@ -51,9 +51,9 @@ router.post('/create-preference', requireAuth, async (req, res) => {
       external_reference: payment.id,
       notification_url: `${process.env.BACKEND_URL}/api/payments/webhook`,
       back_urls: {
-        success: `${process.env.FRONTEND_URL}/pago/exito`,
-        failure: `${process.env.FRONTEND_URL}/pago/error`,
-        pending: `${process.env.FRONTEND_URL}/pago/pendiente`,
+        success: `${process.env.FRONTEND_URL}/alumno/pago`,
+        failure: `${process.env.FRONTEND_URL}/alumno/pago`,
+        pending: `${process.env.FRONTEND_URL}/alumno/pago`,
       },
       auto_return: 'approved',
     },
@@ -70,7 +70,10 @@ router.post('/create-preference', requireAuth, async (req, res) => {
 // POST /api/payments/webhook  – MercadoPago IPN/webhook
 router.post('/webhook', async (req, res) => {
   try {
-    const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+    const raw = req.body;
+    const body = Buffer.isBuffer(raw) ? JSON.parse(raw.toString('utf8'))
+               : typeof raw === 'string' ? JSON.parse(raw)
+               : raw;
     const { type, data } = body;
 
     if (type === 'payment' && data?.id) {
@@ -95,13 +98,15 @@ router.post('/webhook', async (req, res) => {
         .single();
 
       if (payment && status === 'approved') {
-        // Notify via n8n → WhatsApp
         await notifyN8n({
           event: 'payment_approved',
           student_name: payment.users?.name,
           student_phone: payment.users?.phone,
+          professor_phone: process.env.PROFESSOR_PHONE,
           amount: payment.amount,
           concept: payment.concept,
+          month: payment.month,
+          year: payment.year,
           paid_at: payment.paid_at,
         });
       }
@@ -168,8 +173,11 @@ router.post('/manual', requireProfessor, async (req, res) => {
     event: 'payment_approved',
     student_name: data.users?.name,
     student_phone: data.users?.phone,
+    professor_phone: process.env.PROFESSOR_PHONE,
     amount: data.amount,
     concept: data.concept,
+    month: data.month,
+    year: data.year,
     paid_at: data.paid_at,
   });
 

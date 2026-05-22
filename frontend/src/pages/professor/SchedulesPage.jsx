@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { Plus, X, Save, List, LayoutGrid, Pencil } from 'lucide-react';
 import api from '../../lib/api';
 
-const DAYS       = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
-const DAYS_SHORT = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+const DAYS       = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
+const DAYS_SHORT = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
 const EMPTY_CREATE = { class_type_id:'', days:[], start_time:'19:00', end_time:'20:30', location:'Mat Principal' };
 const EMPTY_EDIT   = { class_type_id:'', day_of_week:1, start_time:'19:00', end_time:'20:30', location:'Mat Principal' };
 
@@ -11,10 +11,11 @@ export default function SchedulesPage() {
   const [schedules,  setSchedules]  = useState([]);
   const [classTypes, setClassTypes] = useState([]);
   const [view,       setView]       = useState('grid');
-  const [modal,      setModal]      = useState(null); // null | 'create' | schedule obj
+  const [modal,      setModal]      = useState(null);
   const [form,       setForm]       = useState(EMPTY_CREATE);
   const [saving,     setSaving]     = useState(false);
   const [error,      setError]      = useState('');
+  const [toast,      setToast]      = useState('');
 
   useEffect(() => { load(); }, []);
 
@@ -27,22 +28,15 @@ export default function SchedulesPage() {
     setClassTypes(ctRes.data);
   }
 
-  function openCreate() {
-    setForm(EMPTY_CREATE);
-    setModal('create');
-    setError('');
+  function showToast(msg) {
+    setToast(msg);
+    setTimeout(() => setToast(''), 3000);
   }
 
+  function openCreate() { setForm({ ...EMPTY_CREATE }); setModal('create'); setError(''); }
   function openEdit(s) {
-    setForm({
-      class_type_id: s.class_type_id,
-      day_of_week:   s.day_of_week,
-      start_time:    s.start_time?.slice(0,5),
-      end_time:      s.end_time?.slice(0,5),
-      location:      s.location,
-    });
-    setModal(s);
-    setError('');
+    setForm({ class_type_id:s.class_type_id, day_of_week:s.day_of_week, start_time:s.start_time?.slice(0,5), end_time:s.end_time?.slice(0,5), location:s.location });
+    setModal(s); setError('');
   }
 
   function toggleDay(idx) {
@@ -59,8 +53,10 @@ export default function SchedulesPage() {
       if (modal === 'create') {
         if (form.days.length === 0) { setError('Seleccioná al menos un día'); setSaving(false); return; }
         await api.post('/api/schedules', form);
+        showToast('Horário criado ✓');
       } else {
         await api.put(`/api/schedules/${modal.id}`, form);
+        showToast('Horário atualizado ✓');
       }
       await load();
       setModal(null);
@@ -70,9 +66,10 @@ export default function SchedulesPage() {
   }
 
   async function deleteSchedule(id) {
-    if (!confirm('¿Eliminar este horario?')) return;
+    if (!confirm('¿Eliminar este horário?')) return;
     await api.delete(`/api/schedules/${id}`);
     await load();
+    setModal(null);
   }
 
   const isEditing = modal && modal !== 'create';
@@ -81,19 +78,19 @@ export default function SchedulesPage() {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-white">Horarios</h2>
-          <p className="text-gray-400 text-sm">{schedules.length} clases programadas</p>
+          <h2 className="text-2xl font-bold text-white">Horários</h2>
+          <p className="text-gray-400 text-sm">{schedules.length} treinos programados</p>
         </div>
         <div className="flex items-center gap-2">
           <div className="flex bg-gray-900 border border-gray-800 rounded-xl p-1">
-            <button onClick={()=>setView('list')} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-colors ${view==='list'?'bg-gray-800 text-white':'text-gray-400 hover:text-white'}`}>
+            <button type="button" onClick={()=>setView('list')} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-colors ${view==='list'?'bg-gray-800 text-white':'text-gray-400 hover:text-white'}`}>
               <List size={16}/> Lista
             </button>
-            <button onClick={()=>setView('grid')} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-colors ${view==='grid'?'bg-gray-800 text-white':'text-gray-400 hover:text-white'}`}>
-              <LayoutGrid size={16}/> Cronograma
+            <button type="button" onClick={()=>setView('grid')} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-colors ${view==='grid'?'bg-gray-800 text-white':'text-gray-400 hover:text-white'}`}>
+              <LayoutGrid size={16}/> Semana
             </button>
           </div>
-          <button onClick={openCreate}
+          <button type="button" onClick={openCreate}
             className="flex items-center gap-2 bg-red-600 hover:bg-red-500 text-white px-4 py-2.5 rounded-xl font-medium transition-colors">
             <Plus size={18}/> Agregar
           </button>
@@ -103,12 +100,20 @@ export default function SchedulesPage() {
       {view === 'list' ? (
         <div className="bg-gray-900 rounded-2xl border border-gray-800 overflow-hidden">
           {schedules.length === 0 ? (
-            <div className="p-8 text-center text-gray-500">No hay horarios cargados</div>
+            <div className="p-12 text-center">
+              <LayoutGrid size={40} className="mx-auto text-gray-700 mb-3"/>
+              <p className="text-gray-400 font-medium">Sem horários cadastrados</p>
+              <p className="text-gray-600 text-sm mt-1">Crie o primeiro treino para começar</p>
+              <button type="button" onClick={openCreate}
+                className="mt-4 text-red-500 hover:text-red-400 text-sm underline transition-colors">
+                Criar primeiro horário
+              </button>
+            </div>
           ) : (
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-800">
-                  {['Clase','Día','Horario','Lugar','Profesor'].map(h=>(
+                  {['Treino','Día','Horário','Lugar','Professor'].map(h=>(
                     <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">{h}</th>
                   ))}
                   <th className="px-4 py-3"/>
@@ -128,10 +133,10 @@ export default function SchedulesPage() {
                     <td className="px-4 py-3 text-gray-400 text-sm">{s.location}</td>
                     <td className="px-4 py-3 text-gray-400 text-sm">{s.users?.name || '—'}</td>
                     <td className="px-4 py-3 text-right flex items-center justify-end gap-3">
-                      <button onClick={()=>openEdit(s)} className="text-gray-400 hover:text-white text-sm transition-colors flex items-center gap-1">
+                      <button type="button" onClick={()=>openEdit(s)} className="text-gray-400 hover:text-white text-sm transition-colors flex items-center gap-1">
                         <Pencil size={14}/> Editar
                       </button>
-                      <button onClick={()=>deleteSchedule(s.id)} className="text-gray-500 hover:text-red-400 text-sm transition-colors">
+                      <button type="button" onClick={()=>deleteSchedule(s.id)} className="text-gray-500 hover:text-red-400 text-sm transition-colors">
                         Eliminar
                       </button>
                     </td>
@@ -142,45 +147,55 @@ export default function SchedulesPage() {
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-7 gap-2">
-          {DAYS_SHORT.map((day, idx) => {
-            const dayClasses = schedules.filter(s => s.day_of_week === idx).sort((a,b)=>a.start_time.localeCompare(b.start_time));
-            const isToday = new Date().getDay() === idx;
-            return (
-              <div key={idx} className={`bg-gray-900 rounded-2xl border overflow-hidden ${isToday ? 'border-red-600' : 'border-gray-800'}`}>
-                <div className={`px-3 py-2 text-center border-b ${isToday ? 'bg-red-600 border-red-600' : 'border-gray-800'}`}>
-                  <p className="text-xs font-bold text-white">{day}</p>
+        schedules.length === 0 ? (
+          <div className="bg-gray-900 border border-gray-800 rounded-2xl p-12 text-center">
+            <LayoutGrid size={40} className="mx-auto text-gray-700 mb-3"/>
+            <p className="text-gray-400 font-medium">Sem horários cadastrados</p>
+            <button type="button" onClick={openCreate}
+              className="mt-4 text-red-500 hover:text-red-400 text-sm underline transition-colors">
+              Criar primeiro horário
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-7 gap-2">
+            {DAYS_SHORT.map((day, idx) => {
+              const dayClasses = schedules.filter(s => s.day_of_week === idx).sort((a,b)=>a.start_time.localeCompare(b.start_time));
+              const isToday = new Date().getDay() === idx;
+              return (
+                <div key={idx} className={`bg-gray-900 rounded-2xl border overflow-hidden ${isToday ? 'border-red-600' : 'border-gray-800'}`}>
+                  <div className={`px-3 py-2 text-center border-b ${isToday ? 'bg-red-600 border-red-600' : 'border-gray-800'}`}>
+                    <p className="text-xs font-bold text-white">{day}</p>
+                  </div>
+                  <div className="p-2 space-y-2 min-h-[120px]">
+                    {dayClasses.map(s=>(
+                      <div key={s.id}
+                        onClick={() => openEdit(s)}
+                        className="rounded-lg p-2 text-xs cursor-pointer hover:brightness-125 transition-all"
+                        style={{backgroundColor: s.class_types?.color+'22', borderLeft: `3px solid ${s.class_types?.color}`}}>
+                        <p className="font-semibold text-white leading-tight">{s.class_types?.name}</p>
+                        <p className="text-gray-400 mt-0.5">{s.start_time?.slice(0,5)}</p>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <div className="p-2 space-y-2 min-h-[120px]">
-                  {dayClasses.map(s=>(
-                    <div key={s.id}
-                      onClick={() => openEdit(s)}
-                      className="rounded-lg p-2 text-xs cursor-pointer hover:brightness-125 transition-all"
-                      style={{backgroundColor: s.class_types?.color+'22', borderLeft: `3px solid ${s.class_types?.color}`}}>
-                      <p className="font-semibold text-white leading-tight">{s.class_types?.name}</p>
-                      <p className="text-gray-400 mt-0.5">{s.start_time?.slice(0,5)}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )
       )}
 
-      {/* Modal crear / editar */}
       {modal && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50">
           <div className="bg-gray-900 rounded-2xl border border-gray-800 w-full max-w-md shadow-2xl">
             <div className="flex items-center justify-between p-6 border-b border-gray-800">
               <h3 className="text-lg font-bold text-white">
-                {isEditing ? `Editar: ${modal.class_types?.name} — ${DAYS[modal.day_of_week]}` : 'Nueva clase'}
+                {isEditing ? `Editar: ${modal.class_types?.name} — ${DAYS[modal.day_of_week]}` : 'Novo horário'}
               </h3>
-              <button onClick={()=>setModal(null)} className="text-gray-400 hover:text-white"><X size={20}/></button>
+              <button type="button" onClick={()=>setModal(null)} className="text-gray-400 hover:text-white"><X size={20}/></button>
             </div>
             <form onSubmit={handleSave} className="p-6 space-y-4">
               <div>
-                <label className="block text-xs text-gray-400 mb-1">Tipo de clase *</label>
+                <label className="block text-xs text-gray-400 mb-1">Tipo de treino *</label>
                 <select value={form.class_type_id} onChange={e=>setForm({...form,class_type_id:e.target.value})}
                   className={INPUT} required>
                   <option value="">Seleccionar...</option>
@@ -245,6 +260,12 @@ export default function SchedulesPage() {
               </div>
             </form>
           </div>
+        </div>
+      )}
+
+      {toast && (
+        <div className="fixed bottom-6 right-6 z-50 bg-green-800 border border-green-700 text-green-100 px-5 py-3 rounded-xl shadow-2xl text-sm font-medium">
+          {toast}
         </div>
       )}
     </div>

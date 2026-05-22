@@ -50,4 +50,31 @@ router.get('/debtors', requireProfessor, async (req, res) => {
   res.json({ month, year, count: debtors.length, debtors });
 });
 
+// GET /api/finances/settings – monthly fee (all authenticated users)
+router.get('/settings', async (req, res) => {
+  try {
+    const { data } = await supabase
+      .from('settings')
+      .select('value')
+      .eq('key', 'monthly_fee')
+      .maybeSingle();
+    res.json({ monthly_fee: data?.value ? Number(data.value) : null });
+  } catch {
+    res.json({ monthly_fee: null });
+  }
+});
+
+// PUT /api/finances/settings – set monthly fee (professor only)
+router.put('/settings', requireProfessor, async (req, res) => {
+  const { monthly_fee } = req.body;
+  if (!monthly_fee || Number(monthly_fee) <= 0) {
+    return res.status(400).json({ error: 'Monto inválido' });
+  }
+  const { error } = await supabase
+    .from('settings')
+    .upsert({ key: 'monthly_fee', value: String(monthly_fee) }, { onConflict: 'key' });
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ monthly_fee: Number(monthly_fee) });
+});
+
 module.exports = router;

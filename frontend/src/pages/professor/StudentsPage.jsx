@@ -1,17 +1,18 @@
 import { useState, useEffect } from 'react';
-import { UserPlus, Search, X, Save, ChevronDown } from 'lucide-react';
+import { UserPlus, Search, X, Save } from 'lucide-react';
 import api from '../../lib/api';
 import BeltBadge from '../../components/shared/BeltBadge';
 
-const BELTS   = ['blanco','azul','morado','marron','negro'];
-const STRIPES = [0,1,2,3,4];
-const EMPTY   = { dni:'',pin:'',name:'',belt:'blanco',stripe:0,phone:'',email:'',birth_date:'' };
+const BELTS  = ['blanco','azul','morado','marron','negro'];
+const BELT_PT = { blanco:'Branca', azul:'Azul', morado:'Roxa', marron:'Marrom', negro:'Preta' };
+const GRAUS  = [0,1,2,3,4];
+const EMPTY  = { dni:'', pin:'', name:'', belt:'blanco', stripe:0, phone:'', email:'', birth_date:'' };
 
 export default function StudentsPage() {
   const [students, setStudents] = useState([]);
   const [search,   setSearch]   = useState('');
   const [loading,  setLoading]  = useState(true);
-  const [modal,    setModal]    = useState(null); // null | 'create' | student obj
+  const [modal,    setModal]    = useState(null);
   const [form,     setForm]     = useState(EMPTY);
   const [saving,   setSaving]   = useState(false);
   const [error,    setError]    = useState('');
@@ -25,8 +26,12 @@ export default function StudentsPage() {
     } finally { setLoading(false); }
   }
 
-  function openCreate() { setForm(EMPTY); setModal('create'); setError(''); }
-  function openEdit(s)  { setForm({ ...s, pin:'' }); setModal(s); setError(''); }
+  function openCreate() {
+    setForm({ ...EMPTY });
+    setError('');
+    setModal('create');
+  }
+  function openEdit(s) { setForm({ ...s, pin:'' }); setError(''); setModal(s); }
   function closeModal() { setModal(null); }
 
   async function handleSave(e) {
@@ -54,16 +59,17 @@ export default function StudentsPage() {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-white">Alumnos</h2>
-          <p className="text-gray-400 text-sm">{students.length} alumnos registrados</p>
+          <h2 className="text-2xl font-bold text-white">Atletas</h2>
+          <p className="text-gray-400 text-sm">{students.length} atletas registrados</p>
         </div>
-        <button onClick={openCreate}
+        <button
+          type="button"
+          onClick={openCreate}
           className="flex items-center gap-2 bg-red-600 hover:bg-red-500 text-white px-4 py-2.5 rounded-xl font-medium transition-colors">
-          <UserPlus size={18}/> Nuevo alumno
+          <UserPlus size={18}/> Novo atleta
         </button>
       </div>
 
-      {/* Search */}
       <div className="relative">
         <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"/>
         <input value={search} onChange={e => setSearch(e.target.value)}
@@ -71,17 +77,27 @@ export default function StudentsPage() {
           className="w-full bg-gray-900 border border-gray-800 rounded-xl pl-10 pr-4 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-600"/>
       </div>
 
-      {/* Table */}
       <div className="bg-gray-900 rounded-2xl border border-gray-800 overflow-hidden">
         {loading ? (
           <div className="p-8 text-center text-gray-500">Cargando...</div>
         ) : filtered.length === 0 ? (
-          <div className="p-8 text-center text-gray-500">No se encontraron alumnos</div>
+          <div className="p-12 text-center">
+            <UserPlus size={40} className="mx-auto text-gray-700 mb-3"/>
+            <p className="text-gray-400 font-medium">
+              {search ? 'No se encontraron atletas' : 'No hay atletas registrados'}
+            </p>
+            {!search && (
+              <button type="button" onClick={openCreate}
+                className="mt-4 text-red-500 hover:text-red-400 text-sm underline transition-colors">
+                Agregar primer atleta
+              </button>
+            )}
+          </div>
         ) : (
           <table className="w-full">
             <thead>
               <tr className="border-b border-gray-800">
-                {['Nombre','DNI','Cinturón','Teléfono','Estado'].map(h => (
+                {['Nombre','DNI','Faixa','Teléfono','Estado'].map(h => (
                   <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">{h}</th>
                 ))}
                 <th className="px-4 py-3"/>
@@ -92,7 +108,7 @@ export default function StudentsPage() {
                 <tr key={s.id} className="hover:bg-gray-800/50 transition-colors">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center text-sm font-bold">
+                      <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center text-sm font-bold text-white">
                         {s.name[0]}
                       </div>
                       <span className="font-medium text-white">{s.name}</span>
@@ -103,11 +119,11 @@ export default function StudentsPage() {
                   <td className="px-4 py-3 text-gray-400 text-sm">{s.phone || '—'}</td>
                   <td className="px-4 py-3">
                     <span className={`text-xs font-medium px-2 py-1 rounded-full ${s.active ? 'bg-green-900/40 text-green-400' : 'bg-gray-800 text-gray-500'}`}>
-                      {s.active ? 'Activo' : 'Inactivo'}
+                      {s.active ? 'Ativo' : 'Inativo'}
                     </span>
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <button onClick={() => openEdit(s)}
+                    <button type="button" onClick={() => openEdit(s)}
                       className="text-gray-400 hover:text-white text-sm underline transition-colors">
                       Editar
                     </button>
@@ -119,21 +135,20 @@ export default function StudentsPage() {
         )}
       </div>
 
-      {/* Modal */}
       {modal && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50">
           <div className="bg-gray-900 rounded-2xl border border-gray-800 w-full max-w-lg shadow-2xl">
             <div className="flex items-center justify-between p-6 border-b border-gray-800">
               <h3 className="text-lg font-bold text-white">
-                {modal === 'create' ? 'Nuevo alumno' : `Editar: ${modal.name}`}
+                {modal === 'create' ? 'Novo atleta' : `Editar: ${modal.name}`}
               </h3>
-              <button onClick={closeModal} className="text-gray-400 hover:text-white"><X size={20}/></button>
+              <button type="button" onClick={closeModal} className="text-gray-400 hover:text-white"><X size={20}/></button>
             </div>
             <form onSubmit={handleSave} className="p-6 space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <Field label="Nombre completo" required>
                   <input value={form.name} onChange={e=>setForm({...form,name:e.target.value})}
-                    className={INPUT} placeholder="Juan Pérez" required/>
+                    className={INPUT} placeholder="João Silva" required/>
                 </Field>
                 <Field label="DNI" required={modal==='create'}>
                   <input value={form.dni} onChange={e=>setForm({...form,dni:e.target.value})}
@@ -147,24 +162,24 @@ export default function StudentsPage() {
                 </Field>
                 <Field label="Teléfono">
                   <input value={form.phone||''} onChange={e=>setForm({...form,phone:e.target.value})}
-                    className={INPUT} placeholder="+54 9 11 1234 5678"/>
+                    className={INPUT} placeholder="+54 9 351 000 0000"/>
                 </Field>
                 <Field label="Email">
                   <input type="email" value={form.email||''} onChange={e=>setForm({...form,email:e.target.value})}
-                    className={INPUT} placeholder="alumno@email.com"/>
+                    className={INPUT} placeholder="atleta@email.com"/>
                 </Field>
                 <Field label="Fecha de nacimiento">
                   <input type="date" value={form.birth_date||''} onChange={e=>setForm({...form,birth_date:e.target.value})}
                     className={INPUT}/>
                 </Field>
-                <Field label="Cinturón">
+                <Field label="Faixa">
                   <select value={form.belt} onChange={e=>setForm({...form,belt:e.target.value})} className={INPUT}>
-                    {BELTS.map(b=><option key={b} value={b} className="capitalize">{b}</option>)}
+                    {BELTS.map(b=><option key={b} value={b}>{BELT_PT[b]}</option>)}
                   </select>
                 </Field>
-                <Field label="Rayitas">
+                <Field label="Graus">
                   <select value={form.stripe} onChange={e=>setForm({...form,stripe:Number(e.target.value)})} className={INPUT}>
-                    {STRIPES.map(s=><option key={s} value={s}>{s}</option>)}
+                    {GRAUS.map(g=><option key={g} value={g}>{g}</option>)}
                   </select>
                 </Field>
               </div>
@@ -173,7 +188,7 @@ export default function StudentsPage() {
                 <label className="flex items-center gap-3 cursor-pointer">
                   <input type="checkbox" checked={form.active} onChange={e=>setForm({...form,active:e.target.checked})}
                     className="w-4 h-4 accent-red-600"/>
-                  <span className="text-sm text-gray-300">Alumno activo</span>
+                  <span className="text-sm text-gray-300">Atleta ativo</span>
                 </label>
               )}
 

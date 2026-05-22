@@ -7,10 +7,10 @@ import ProfilePage    from './ProfilePage';
 import PaymentPage    from './PaymentPage';
 
 const LINKS = [
-  { to: '/alumno/dashboard', icon: LayoutDashboard, label: 'Dashboard'  },
-  { to: '/alumno/horarios',  icon: CalendarDays,    label: 'Mis horarios'},
-  { to: '/alumno/perfil',    icon: User,            label: 'Mi perfil'  },
-  { to: '/alumno/pago',      icon: CreditCard,      label: 'Pagar cuota'},
+  { to: '/alumno/dashboard', icon: LayoutDashboard, label: 'Dashboard'      },
+  { to: '/alumno/horarios',  icon: CalendarDays,    label: 'Meus Horários'  },
+  { to: '/alumno/perfil',    icon: User,            label: 'Meu Perfil'     },
+  { to: '/alumno/pago',      icon: CreditCard,      label: 'Mensalidade'    },
 ];
 
 export default function StudentLayout() {

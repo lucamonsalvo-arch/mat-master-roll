@@ -26,8 +26,13 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 flex items-center justify-center p-4">
-      <div className="w-full max-w-sm">
+    <div className="min-h-screen bg-gray-950 flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Tatami pattern */}
+      <div className="absolute inset-0 opacity-[0.12]" style={{
+        backgroundImage: `url("data:image/svg+xml,%3Csvg width='80' height='80' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='80' height='40' fill='none' stroke='%23fff' stroke-width='0.8'/%3E%3Crect y='40' width='80' height='40' fill='none' stroke='%23fff' stroke-width='0.8'/%3E%3Cline x1='0' y1='20' x2='40' y2='20' stroke='%23fff' stroke-width='0.4'/%3E%3Cline x1='40' y1='0' x2='40' y2='40' stroke='%23fff' stroke-width='0.4'/%3E%3Cline x1='40' y1='60' x2='80' y2='60' stroke='%23fff' stroke-width='0.4'/%3E%3Cline x1='40' y1='40' x2='40' y2='80' stroke='%23fff' stroke-width='0.4'/%3E%3C/svg%3E")`,
+        backgroundSize: '80px 80px',
+      }} />
+      <div className="w-full max-w-sm relative z-10">
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-20 h-20 bg-red-600 rounded-2xl mb-4 shadow-lg shadow-red-900/50">
@@ -83,4 +88,5 @@ export default function LoginPage() {
       </div>
     </div>
   );
+
 }

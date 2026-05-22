@@ -46,7 +46,7 @@ router.post('/', requireProfessor, async (req, res) => {
   const pin_hash = await bcrypt.hash(String(pin), 10);
   const { data, error } = await supabase
     .from('users')
-    .insert({ dni, pin_hash, name, role: 'alumno', belt, stripe, phone, email, photo_url, birth_date })
+    .insert({ dni, pin_hash, name, role: 'alumno', belt, stripe, phone, email, photo_url, birth_date: birth_date || null })
     .select('id,dni,name,role,belt,stripe,phone,email,photo_url,birth_date,join_date,active')
     .single();
 
@@ -68,6 +68,7 @@ router.put('/:id', requireAuth, async (req, res) => {
   for (const key of allowed) {
     if (req.body[key] !== undefined) updates[key] = req.body[key];
   }
+  if (updates.birth_date === '') updates.birth_date = null;
   if (updates.pin) {
     updates.pin_hash = await bcrypt.hash(String(updates.pin), 10);
     delete updates.pin;

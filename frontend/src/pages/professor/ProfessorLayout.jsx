@@ -8,11 +8,11 @@ import FinancesPage from './FinancesPage';
 import AccessPage from './AccessPage';
 
 const LINKS = [
-  { to: '/profesor/alumnos',   icon: Users,        label: 'Alumnos'  },
-  { to: '/profesor/clases',    icon: LayoutGrid,   label: 'Clases'   },
-  { to: '/profesor/horarios',  icon: CalendarDays, label: 'Horarios' },
-  { to: '/profesor/finanzas',  icon: DollarSign,   label: 'Finanzas' },
-  { to: '/profesor/accesos',   icon: ShieldCheck,  label: 'Accesos'  },
+  { to: '/profesor/alumnos',   icon: Users,        label: 'Atletas'   },
+  { to: '/profesor/clases',    icon: LayoutGrid,   label: 'Treinos'   },
+  { to: '/profesor/horarios',  icon: CalendarDays, label: 'Horários'  },
+  { to: '/profesor/finanzas',  icon: DollarSign,   label: 'Finanças'  },
+  { to: '/profesor/accesos',   icon: ShieldCheck,  label: 'Acessos'   },
 ];
 
 export default function ProfessorLayout() {
