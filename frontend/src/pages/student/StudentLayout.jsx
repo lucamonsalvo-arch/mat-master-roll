@@ -8,9 +8,9 @@ import PaymentPage    from './PaymentPage';
 
 const LINKS = [
   { to: '/alumno/dashboard', icon: LayoutDashboard, label: 'Dashboard'      },
-  { to: '/alumno/horarios',  icon: CalendarDays,    label: 'Meus Horários'  },
-  { to: '/alumno/perfil',    icon: User,            label: 'Meu Perfil'     },
-  { to: '/alumno/pago',      icon: CreditCard,      label: 'Mensalidade'    },
+  { to: '/alumno/horarios',  icon: CalendarDays,    label: 'Mis Horarios'   },
+  { to: '/alumno/perfil',    icon: User,            label: 'Mi Perfil'      },
+  { to: '/alumno/pago',      icon: CreditCard,      label: 'Mensualidad'    },
 ];
 
 export default function StudentLayout() {

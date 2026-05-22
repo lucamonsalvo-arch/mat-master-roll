@@ -66,7 +66,7 @@ export default function StudentsPage() {
           type="button"
           onClick={openCreate}
           className="flex items-center gap-2 bg-red-600 hover:bg-red-500 text-white px-4 py-2.5 rounded-xl font-medium transition-colors">
-          <UserPlus size={18}/> Novo atleta
+          <UserPlus size={18}/> Nuevo atleta
         </button>
       </div>
 
@@ -119,7 +119,7 @@ export default function StudentsPage() {
                   <td className="px-4 py-3 text-gray-400 text-sm">{s.phone || '—'}</td>
                   <td className="px-4 py-3">
                     <span className={`text-xs font-medium px-2 py-1 rounded-full ${s.active ? 'bg-green-900/40 text-green-400' : 'bg-gray-800 text-gray-500'}`}>
-                      {s.active ? 'Ativo' : 'Inativo'}
+                      {s.active ? 'Activo' : 'Inactivo'}
                     </span>
                   </td>
                   <td className="px-4 py-3 text-right">
@@ -140,7 +140,7 @@ export default function StudentsPage() {
           <div className="bg-gray-900 rounded-2xl border border-gray-800 w-full max-w-lg shadow-2xl">
             <div className="flex items-center justify-between p-6 border-b border-gray-800">
               <h3 className="text-lg font-bold text-white">
-                {modal === 'create' ? 'Novo atleta' : `Editar: ${modal.name}`}
+                {modal === 'create' ? 'Nuevo atleta' : `Editar: ${modal.name}`}
               </h3>
               <button type="button" onClick={closeModal} className="text-gray-400 hover:text-white"><X size={20}/></button>
             </div>
@@ -188,7 +188,7 @@ export default function StudentsPage() {
                 <label className="flex items-center gap-3 cursor-pointer">
                   <input type="checkbox" checked={form.active} onChange={e=>setForm({...form,active:e.target.checked})}
                     className="w-4 h-4 accent-red-600"/>
-                  <span className="text-sm text-gray-300">Atleta ativo</span>
+                  <span className="text-sm text-gray-300">Atleta activo</span>
                 </label>
               )}
 

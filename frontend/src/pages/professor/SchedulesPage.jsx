@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { Plus, X, Save, List, LayoutGrid, Pencil } from 'lucide-react';
 import api from '../../lib/api';
 
-const DAYS       = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
-const DAYS_SHORT = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+const DAYS       = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+const DAYS_SHORT = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
 const EMPTY_CREATE = { class_type_id:'', days:[], start_time:'19:00', end_time:'20:30', location:'Mat Principal' };
 const EMPTY_EDIT   = { class_type_id:'', day_of_week:1, start_time:'19:00', end_time:'20:30', location:'Mat Principal' };
 
@@ -53,10 +53,10 @@ export default function SchedulesPage() {
       if (modal === 'create') {
         if (form.days.length === 0) { setError('Seleccioná al menos un día'); setSaving(false); return; }
         await api.post('/api/schedules', form);
-        showToast('Horário criado ✓');
+        showToast('Horario creado ✓');
       } else {
         await api.put(`/api/schedules/${modal.id}`, form);
-        showToast('Horário atualizado ✓');
+        showToast('Horario actualizado ✓');
       }
       await load();
       setModal(null);
@@ -66,7 +66,7 @@ export default function SchedulesPage() {
   }
 
   async function deleteSchedule(id) {
-    if (!confirm('¿Eliminar este horário?')) return;
+    if (!confirm('¿Eliminar este horario?')) return;
     await api.delete(`/api/schedules/${id}`);
     await load();
     setModal(null);
@@ -78,8 +78,8 @@ export default function SchedulesPage() {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-white">Horários</h2>
-          <p className="text-gray-400 text-sm">{schedules.length} treinos programados</p>
+          <h2 className="text-2xl font-bold text-white">Horarios</h2>
+          <p className="text-gray-400 text-sm">{schedules.length} clases programadas</p>
         </div>
         <div className="flex items-center gap-2">
           <div className="flex bg-gray-900 border border-gray-800 rounded-xl p-1">
@@ -102,18 +102,18 @@ export default function SchedulesPage() {
           {schedules.length === 0 ? (
             <div className="p-12 text-center">
               <LayoutGrid size={40} className="mx-auto text-gray-700 mb-3"/>
-              <p className="text-gray-400 font-medium">Sem horários cadastrados</p>
-              <p className="text-gray-600 text-sm mt-1">Crie o primeiro treino para começar</p>
+              <p className="text-gray-400 font-medium">Sin horarios registrados</p>
+              <p className="text-gray-600 text-sm mt-1">Creá el primer horario para empezar</p>
               <button type="button" onClick={openCreate}
                 className="mt-4 text-red-500 hover:text-red-400 text-sm underline transition-colors">
-                Criar primeiro horário
+                Crear primer horario
               </button>
             </div>
           ) : (
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-800">
-                  {['Treino','Día','Horário','Lugar','Professor'].map(h=>(
+                  {['Clase','Día','Horario','Lugar','Profesor'].map(h=>(
                     <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">{h}</th>
                   ))}
                   <th className="px-4 py-3"/>
@@ -150,10 +150,10 @@ export default function SchedulesPage() {
         schedules.length === 0 ? (
           <div className="bg-gray-900 border border-gray-800 rounded-2xl p-12 text-center">
             <LayoutGrid size={40} className="mx-auto text-gray-700 mb-3"/>
-            <p className="text-gray-400 font-medium">Sem horários cadastrados</p>
+            <p className="text-gray-400 font-medium">Sin horarios registrados</p>
             <button type="button" onClick={openCreate}
               className="mt-4 text-red-500 hover:text-red-400 text-sm underline transition-colors">
-              Criar primeiro horário
+              Crear primer horario
             </button>
           </div>
         ) : (
@@ -189,13 +189,13 @@ export default function SchedulesPage() {
           <div className="bg-gray-900 rounded-2xl border border-gray-800 w-full max-w-md shadow-2xl">
             <div className="flex items-center justify-between p-6 border-b border-gray-800">
               <h3 className="text-lg font-bold text-white">
-                {isEditing ? `Editar: ${modal.class_types?.name} — ${DAYS[modal.day_of_week]}` : 'Novo horário'}
+                {isEditing ? `Editar: ${modal.class_types?.name} — ${DAYS[modal.day_of_week]}` : 'Nuevo horario'}
               </h3>
               <button type="button" onClick={()=>setModal(null)} className="text-gray-400 hover:text-white"><X size={20}/></button>
             </div>
             <form onSubmit={handleSave} className="p-6 space-y-4">
               <div>
-                <label className="block text-xs text-gray-400 mb-1">Tipo de treino *</label>
+                <label className="block text-xs text-gray-400 mb-1">Tipo de clase *</label>
                 <select value={form.class_type_id} onChange={e=>setForm({...form,class_type_id:e.target.value})}
                   className={INPUT} required>
                   <option value="">Seleccionar...</option>

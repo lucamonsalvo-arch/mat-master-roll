@@ -27,8 +27,8 @@ export default function AccessPage() {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-white">Acessos</h2>
-          <p className="text-gray-400 text-sm">Histórico de ingressos ao sistema</p>
+          <h2 className="text-2xl font-bold text-white">Accesos</h2>
+          <p className="text-gray-400 text-sm">Historial de ingresos al sistema</p>
         </div>
         <button type="button" onClick={fetchLogs}
           className="flex items-center gap-2 bg-gray-800 hover:bg-gray-700 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition-colors">
@@ -57,7 +57,7 @@ export default function AccessPage() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-gray-800">
-                {['Usuário','DNI','Rol','Acción','Fecha y hora'].map(h=>(
+                {['Usuario','DNI','Rol','Acción','Fecha y hora'].map(h=>(
                   <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">{h}</th>
                 ))}
               </tr>
@@ -77,7 +77,7 @@ export default function AccessPage() {
                   <td className="px-4 py-3">
                     <span className={`text-xs font-medium px-2 py-1 rounded-full ${
                       log.users?.role==='profesor'?'bg-red-900/40 text-red-400':'bg-blue-900/40 text-blue-400'}`}>
-                      {log.users?.role === 'profesor' ? 'Professor' : 'Atleta'}
+                      {log.users?.role === 'profesor' ? 'Profesor' : 'Atleta'}
                     </span>
                   </td>
                   <td className="px-4 py-3">

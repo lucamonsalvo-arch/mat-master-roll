@@ -3,7 +3,7 @@ import { Calendar, Clock, MapPin } from 'lucide-react';
 import api from '../../lib/api';
 import { getUser } from '../../lib/auth';
 
-const DAYS = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
+const DAYS = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
 
 export default function SchedulesPage() {
   const user = getUser();
@@ -21,17 +21,17 @@ export default function SchedulesPage() {
   return (
     <div className="p-6 space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-white">Meus horários</h2>
-        <p className="text-gray-400 text-sm">{enrollments.length} treino{enrollments.length !== 1 ? 's' : ''} inscrito</p>
+        <h2 className="text-2xl font-bold text-white">Mis horarios</h2>
+        <p className="text-gray-400 text-sm">{enrollments.length} clase{enrollments.length !== 1 ? 's' : ''} inscripto</p>
       </div>
 
       {loading ? (
-        <div className="text-center py-12 text-gray-500">Carregando...</div>
+        <div className="text-center py-12 text-gray-500">Cargando...</div>
       ) : enrollments.length === 0 ? (
         <div className="bg-gray-900 border border-gray-800 rounded-2xl p-8 text-center">
           <Calendar size={40} className="mx-auto text-gray-600 mb-3"/>
-          <p className="text-gray-400">Você não está inscrito em nenhum treino</p>
-          <p className="text-gray-500 text-sm mt-1">Fale com seu professor para te adicionar</p>
+          <p className="text-gray-400">No estás inscripto en ninguna clase todavía</p>
+          <p className="text-gray-500 text-sm mt-1">Hablá con tu profesor para que te agregue</p>
         </div>
       ) : (
         <div className="grid gap-4 md:grid-cols-2">
@@ -45,7 +45,7 @@ export default function SchedulesPage() {
               <div key={idx} className={`bg-gray-900 rounded-2xl border overflow-hidden ${isToday?'border-red-600':'border-gray-800'}`}>
                 <div className={`px-5 py-3 border-b ${isToday?'bg-red-600/20 border-red-800':'border-gray-800'}`}>
                   <h3 className={`font-bold ${isToday?'text-red-400':'text-white'}`}>
-                    {day} {isToday && <span className="text-xs font-normal">(hoje)</span>}
+                    {day} {isToday && <span className="text-xs font-normal">(hoy)</span>}
                   </h3>
                 </div>
                 <div className="p-4 space-y-3">

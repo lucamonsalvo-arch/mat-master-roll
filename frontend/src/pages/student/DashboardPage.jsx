@@ -5,7 +5,7 @@ import api from '../../lib/api';
 import { getUser } from '../../lib/auth';
 import BeltBadge from '../../components/shared/BeltBadge';
 
-const MONTHS = ['','Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const MONTHS = ['','Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 
 export default function DashboardPage() {
   const user = getUser();
@@ -52,30 +52,30 @@ export default function DashboardPage() {
       <div className="grid grid-cols-3 gap-4">
         <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
           <CalendarCheck className="text-red-500 mb-2" size={24}/>
-          <p className="text-gray-400 text-sm">Treinos este mês</p>
+          <p className="text-gray-400 text-sm">Clases este mes</p>
           <p className="text-3xl font-black text-white mt-1">{stats?.total ?? '—'}</p>
         </div>
 
         <Link to="/alumno/pago" className="block">
           <div className={`border rounded-2xl p-5 cursor-pointer transition-all hover:brightness-110 ${currentMonthPaid ? 'bg-green-900/20 border-green-800' : 'bg-yellow-900/20 border-yellow-800'}`}>
             <Award className={currentMonthPaid ? 'text-green-400 mb-2' : 'text-yellow-400 mb-2'} size={24}/>
-            <p className="text-gray-400 text-sm">Mensalidade {MONTHS[now.getMonth()+1]}</p>
+            <p className="text-gray-400 text-sm">Mensualidad {MONTHS[now.getMonth()+1]}</p>
             <p className={`text-xl font-black mt-1 ${currentMonthPaid ? 'text-green-400' : 'text-yellow-400'}`}>
-              {currentMonthPaid ? 'Em dia ✓' : 'Pendente →'}
+              {currentMonthPaid ? 'Al día ✓' : 'Pendiente →'}
             </p>
           </div>
         </Link>
 
         <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
           <TrendingUp className="text-blue-500 mb-2" size={24}/>
-          <p className="text-gray-400 text-sm">Total de treinos</p>
+          <p className="text-gray-400 text-sm">Total de clases</p>
           <p className="text-3xl font-black text-white mt-1">{totalAttendance || '—'}</p>
         </div>
       </div>
 
       {stats?.byClass && Object.keys(stats.byClass).length > 0 && (
         <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
-          <h3 className="font-bold text-white mb-4">Presença por treino — {MONTHS[stats.month]} {stats.year}</h3>
+          <h3 className="font-bold text-white mb-4">Presencia por clase — {MONTHS[stats.month]} {stats.year}</h3>
           <div className="space-y-3">
             {Object.entries(stats.byClass).map(([name, count]) => (
               <div key={name} className="flex items-center gap-3">
@@ -98,9 +98,9 @@ export default function DashboardPage() {
       )}
 
       <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
-        <h3 className="font-bold text-white mb-4">Últimos pagamentos</h3>
+        <h3 className="font-bold text-white mb-4">Últimos pagos</h3>
         {payments.length === 0 ? (
-          <p className="text-gray-500 text-sm">Nenhum pagamento registrado</p>
+          <p className="text-gray-500 text-sm">Sin pagos registrados</p>
         ) : (
           <div className="space-y-2">
             {payments.map(p => (
@@ -115,7 +115,7 @@ export default function DashboardPage() {
                     p.status==='approved'?'bg-green-900/40 text-green-400':
                     p.status==='pending' ?'bg-yellow-900/40 text-yellow-400':
                     'bg-red-900/40 text-red-400'}`}>
-                    {p.status==='approved'?'Aprovado':p.status==='pending'?'Pendente':'Rejeitado'}
+                    {p.status==='approved'?'Aprobado':p.status==='pending'?'Pendiente':'Rechazado'}
                   </span>
                 </div>
               </div>

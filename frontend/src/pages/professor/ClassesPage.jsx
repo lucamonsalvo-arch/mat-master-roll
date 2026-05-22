@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
-import { CheckSquare, Square, ChevronDown, Users, Calendar, UserPlus, Info, LayoutGrid } from 'lucide-react';
+import { CheckSquare, Square, ChevronDown, Users, Calendar, Info, LayoutGrid } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import api from '../../lib/api';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import BeltBadge from '../../components/shared/BeltBadge';
 
-const DAYS = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+const DAYS = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
 
 export default function ClassesPage() {
   const [schedules,   setSchedules]   = useState([]);
@@ -16,7 +16,7 @@ export default function ClassesPage() {
   const [attendance,  setAttendance]  = useState(new Set());
   const [loading,     setLoading]     = useState(false);
   const [saving,      setSaving]      = useState(false);
-  const [tab,         setTab]         = useState('attendance'); // 'attendance' | 'enrollment'
+  const [tab,         setTab]         = useState('attendance');
   const [allStudents, setAllStudents] = useState([]);
   const [enrolling,   setEnrolling]   = useState(null);
 
@@ -95,16 +95,16 @@ export default function ClassesPage() {
     return (
       <div className="p-6">
         <div>
-          <h2 className="text-2xl font-bold text-white">Treinos</h2>
-          <p className="text-gray-400 text-sm">Marcá a presença por treino e data</p>
+          <h2 className="text-2xl font-bold text-white">Clases</h2>
+          <p className="text-gray-400 text-sm">Marcá la presencia por clase y fecha</p>
         </div>
         <div className="mt-8 bg-gray-900 border border-gray-800 rounded-2xl p-12 text-center">
           <LayoutGrid size={40} className="mx-auto text-gray-700 mb-3"/>
-          <p className="text-gray-400 font-medium">Sem horários cadastrados</p>
-          <p className="text-gray-600 text-sm mt-1">Criá um horário primeiro para poder marcar a presença</p>
+          <p className="text-gray-400 font-medium">Sin horarios registrados</p>
+          <p className="text-gray-600 text-sm mt-1">Creá un horario primero para poder marcar la presencia</p>
           <Link to="/profesor/horarios"
             className="mt-4 inline-block text-red-500 hover:text-red-400 text-sm underline transition-colors">
-            Ir a Horários →
+            Ir a Horarios →
           </Link>
         </div>
       </div>
@@ -114,8 +114,8 @@ export default function ClassesPage() {
   return (
     <div className="p-6 space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-white">Treinos</h2>
-        <p className="text-gray-400 text-sm">Marcá a presença por treino e data</p>
+        <h2 className="text-2xl font-bold text-white">Clases</h2>
+        <p className="text-gray-400 text-sm">Marcá la presencia por clase y fecha</p>
       </div>
 
       <div className="flex flex-wrap gap-3">
@@ -160,11 +160,10 @@ export default function ClassesPage() {
             </div>
           </div>
 
-          {/* Tabs */}
           <div className="flex border-b border-gray-800">
             {[
-              { key: 'attendance', label: 'Presença' },
-              { key: 'enrollment', label: 'Inscrições' },
+              { key: 'attendance', label: 'Presencia' },
+              { key: 'enrollment', label: 'Inscripciones' },
             ].map(t => (
               <button
                 key={t.key}
@@ -188,10 +187,10 @@ export default function ClassesPage() {
               ) : students.length === 0 ? (
                 <div className="p-8 text-center">
                   <Users size={32} className="mx-auto text-gray-700 mb-3"/>
-                  <p className="text-gray-400 text-sm">Sem atletas inscritos neste treino</p>
+                  <p className="text-gray-400 text-sm">Sin atletas inscriptos en esta clase</p>
                   <button type="button" onClick={() => setTab('enrollment')}
                     className="mt-2 text-red-500 hover:text-red-400 text-xs underline">
-                    Ir a Inscrições →
+                    Ir a Inscripciones →
                   </button>
                 </div>
               ) : (
@@ -233,7 +232,7 @@ export default function ClassesPage() {
                 <button type="button" onClick={saveAttendance}
                   disabled={saving || students.length === 0}
                   className="w-full bg-red-600 hover:bg-red-500 disabled:opacity-50 text-white font-bold py-3 rounded-xl transition-colors">
-                  {saving ? 'Guardando...' : 'Guardar presença'}
+                  {saving ? 'Guardando...' : 'Guardar presencia'}
                 </button>
               </div>
             </>
@@ -244,10 +243,10 @@ export default function ClassesPage() {
               <div className="bg-blue-900/20 border border-blue-800/50 rounded-xl p-4 flex items-start gap-3">
                 <Info size={16} className="text-blue-400 flex-shrink-0 mt-0.5"/>
                 <div>
-                  <p className="text-blue-300 font-medium text-sm">Como inscribir atletas</p>
+                  <p className="text-blue-300 font-medium text-sm">Cómo inscribir atletas</p>
                   <p className="text-blue-400/80 text-xs mt-0.5 leading-relaxed">
-                    Solo los atletas inscritos en este treino aparecen en la lista de presença.
-                    Usá los botones para inscribir o dar de baja a un atleta de este horário.
+                    Solo los atletas inscriptos en esta clase aparecen en la lista de presencia.
+                    Usá los botones para inscribir o dar de baja a un atleta de este horario.
                   </p>
                 </div>
               </div>
@@ -279,7 +278,7 @@ export default function ClassesPage() {
                               : 'bg-gray-800 text-gray-400 hover:bg-green-900/40 hover:text-green-400'
                           }`}
                         >
-                          {enrolling === s.id ? '...' : isEnrolled ? 'Inscrito ✓' : '+ Inscribir'}
+                          {enrolling === s.id ? '...' : isEnrolled ? 'Inscripto ✓' : '+ Inscribir'}
                         </button>
                       </div>
                     );
