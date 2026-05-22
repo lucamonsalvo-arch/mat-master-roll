@@ -27,10 +27,11 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-gray-950 flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Tatami pattern */}
-      <div className="absolute inset-0 opacity-[0.12]" style={{
-        backgroundImage: `url("data:image/svg+xml,%3Csvg width='80' height='80' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='80' height='40' fill='none' stroke='%23fff' stroke-width='0.8'/%3E%3Crect y='40' width='80' height='40' fill='none' stroke='%23fff' stroke-width='0.8'/%3E%3Cline x1='0' y1='20' x2='40' y2='20' stroke='%23fff' stroke-width='0.4'/%3E%3Cline x1='40' y1='0' x2='40' y2='40' stroke='%23fff' stroke-width='0.4'/%3E%3Cline x1='40' y1='60' x2='80' y2='60' stroke='%23fff' stroke-width='0.4'/%3E%3Cline x1='40' y1='40' x2='40' y2='80' stroke='%23fff' stroke-width='0.4'/%3E%3C/svg%3E")`,
+      {/* Tatami pattern — 4 quadrants alternating H/V mats */}
+      <div className="absolute inset-0 opacity-[0.13]" style={{
+        backgroundImage: `url("data:image/svg+xml,%3Csvg width='80' height='80' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='1' y='1' width='38' height='18' fill='none' stroke='%23ffffff' stroke-width='0.9'/%3E%3Crect x='1' y='21' width='38' height='18' fill='none' stroke='%23ffffff' stroke-width='0.9'/%3E%3Crect x='41' y='1' width='18' height='38' fill='none' stroke='%23ffffff' stroke-width='0.9'/%3E%3Crect x='61' y='1' width='18' height='38' fill='none' stroke='%23ffffff' stroke-width='0.9'/%3E%3Crect x='1' y='41' width='18' height='38' fill='none' stroke='%23ffffff' stroke-width='0.9'/%3E%3Crect x='21' y='41' width='18' height='38' fill='none' stroke='%23ffffff' stroke-width='0.9'/%3E%3Crect x='41' y='41' width='38' height='18' fill='none' stroke='%23ffffff' stroke-width='0.9'/%3E%3Crect x='41' y='61' width='38' height='18' fill='none' stroke='%23ffffff' stroke-width='0.9'/%3E%3C/svg%3E")`,
         backgroundSize: '80px 80px',
+        backgroundRepeat: 'repeat',
       }} />
       <div className="w-full max-w-sm relative z-10">
         {/* Logo */}
