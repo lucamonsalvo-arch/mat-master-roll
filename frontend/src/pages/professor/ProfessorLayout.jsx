@@ -15,11 +15,15 @@ const LINKS = [
   { to: '/profesor/accesos',   icon: ShieldCheck,  label: 'Accesos'   },
 ];
 
+const TATAMI = `url("data:image/svg+xml,%3Csvg width='80' height='80' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='1' y='1' width='38' height='18' fill='none' stroke='%23ffffff' stroke-width='0.9'/%3E%3Crect x='1' y='21' width='38' height='18' fill='none' stroke='%23ffffff' stroke-width='0.9'/%3E%3Crect x='41' y='1' width='18' height='38' fill='none' stroke='%23ffffff' stroke-width='0.9'/%3E%3Crect x='61' y='1' width='18' height='38' fill='none' stroke='%23ffffff' stroke-width='0.9'/%3E%3Crect x='1' y='41' width='18' height='38' fill='none' stroke='%23ffffff' stroke-width='0.9'/%3E%3Crect x='21' y='41' width='18' height='38' fill='none' stroke='%23ffffff' stroke-width='0.9'/%3E%3Crect x='41' y='41' width='38' height='18' fill='none' stroke='%23ffffff' stroke-width='0.9'/%3E%3Crect x='41' y='61' width='38' height='18' fill='none' stroke='%23ffffff' stroke-width='0.9'/%3E%3C/svg%3E")`;
+
 export default function ProfessorLayout() {
   return (
-    <div className="flex min-h-screen bg-gray-950">
+    <div className="flex min-h-screen bg-gray-950 relative">
+      <div className="absolute inset-0 opacity-[0.04] pointer-events-none"
+        style={{ backgroundImage: TATAMI, backgroundSize: '80px 80px', backgroundRepeat: 'repeat' }}/>
       <Sidebar links={LINKS} />
-      <main className="flex-1 overflow-auto">
+      <main className="flex-1 overflow-auto relative z-10">
         <Routes>
           <Route path="alumnos"  element={<StudentsPage />} />
           <Route path="clases"   element={<ClassesPage />} />
