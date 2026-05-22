@@ -1,30 +1,47 @@
-import { NavLink, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { NavLink, useNavigate, useLocation } from 'react-router-dom';
+import { Menu, X } from 'lucide-react';
 import { clearAuth, getUser } from '../../lib/auth';
 
 export default function Sidebar({ links }) {
-  const navigate = useNavigate();
-  const user = getUser();
+  const navigate  = useNavigate();
+  const location  = useLocation();
+  const user      = getUser();
+  const [open, setOpen] = useState(false);
+
+  // Close drawer on route change (mobile)
+  useEffect(() => { setOpen(false); }, [location.pathname]);
+
+  // Prevent body scroll when drawer is open
+  useEffect(() => {
+    document.body.style.overflow = open ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [open]);
 
   function logout() {
     clearAuth();
     navigate('/login');
   }
 
-  return (
-    <aside className="w-64 bg-gray-900 border-r border-gray-800 flex flex-col min-h-screen">
+  const navContent = (
+    <>
       {/* Header */}
-      <div className="p-6 border-b border-gray-800">
+      <div className="p-5 border-b border-gray-800 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-red-600 rounded-xl flex items-center justify-center text-xl">🥋</div>
+          <div className="w-10 h-10 bg-red-600 rounded-xl flex items-center justify-center text-xl flex-shrink-0">🥋</div>
           <div>
             <h1 className="font-black text-white text-sm leading-tight">Mat Master Roll</h1>
             <p className="text-gray-500 text-xs">{user?.role === 'profesor' ? 'Profesor' : 'Atleta'}</p>
           </div>
         </div>
+        {/* Close button — mobile only */}
+        <button onClick={() => setOpen(false)} className="md:hidden text-gray-400 hover:text-white p-1">
+          <X size={20}/>
+        </button>
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 p-4 space-y-1">
+      <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
         {links.map(({ to, icon: Icon, label }) => (
           <NavLink
             key={to}
@@ -37,7 +54,7 @@ export default function Sidebar({ links }) {
               }`
             }
           >
-            <Icon size={18} />
+            <Icon size={18}/>
             {label}
           </NavLink>
         ))}
@@ -46,7 +63,7 @@ export default function Sidebar({ links }) {
       {/* User footer */}
       <div className="p-4 border-t border-gray-800">
         <div className="flex items-center gap-3 px-3 py-2 mb-2">
-          <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center text-sm font-bold text-white">
+          <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center text-sm font-bold text-white flex-shrink-0">
             {user?.name?.[0]?.toUpperCase()}
           </div>
           <div className="flex-1 min-w-0">
@@ -61,6 +78,49 @@ export default function Sidebar({ links }) {
           Cerrar sesión
         </button>
       </div>
-    </aside>
+    </>
+  );
+
+  return (
+    <>
+      {/* ── Desktop sidebar ─────────────────────────────────── */}
+      <aside className="hidden md:flex w-64 bg-gray-900 border-r border-gray-800 flex-col min-h-screen flex-shrink-0">
+        {navContent}
+      </aside>
+
+      {/* ── Mobile: top bar + drawer ─────────────────────────── */}
+      <div className="md:hidden">
+        {/* Top bar */}
+        <div className="fixed top-0 left-0 right-0 z-40 flex items-center gap-3 bg-gray-900 border-b border-gray-800 px-4 h-14">
+          <button onClick={() => setOpen(true)} className="text-gray-400 hover:text-white p-1">
+            <Menu size={22}/>
+          </button>
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 bg-red-600 rounded-lg flex items-center justify-center text-base">🥋</div>
+            <span className="font-black text-white text-sm">Mat Master Roll</span>
+          </div>
+        </div>
+
+        {/* Spacer so content doesn't hide under top bar */}
+        <div className="h-14"/>
+
+        {/* Backdrop */}
+        {open && (
+          <div
+            className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"
+            onClick={() => setOpen(false)}
+          />
+        )}
+
+        {/* Drawer */}
+        <aside
+          className={`fixed top-0 left-0 z-50 h-full w-72 bg-gray-900 border-r border-gray-800 flex flex-col
+            transition-transform duration-300 ease-in-out
+            ${open ? 'translate-x-0' : '-translate-x-full'}`}
+        >
+          {navContent}
+        </aside>
+      </div>
+    </>
   );
 }
