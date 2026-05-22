@@ -73,6 +73,19 @@ router.post('/bulk', requireProfessor, async (req, res) => {
   res.json(data);
 });
 
+// PUT /api/attendance/:id  – edit date or notes (profesor only)
+router.put('/:id', requireProfessor, async (req, res) => {
+  const { class_date, schedule_id, notes } = req.body;
+  const updates = {};
+  if (class_date  !== undefined) updates.class_date  = class_date;
+  if (schedule_id !== undefined) updates.schedule_id = schedule_id;
+  if (notes       !== undefined) updates.notes       = notes;
+  const { data, error } = await supabase
+    .from('attendance').update(updates).eq('id', req.params.id).select('*').single();
+  if (error) return res.status(400).json({ error: error.message });
+  res.json(data);
+});
+
 // DELETE /api/attendance/:id  – remove attendance mark
 router.delete('/:id', requireProfessor, async (req, res) => {
   const { error } = await supabase.from('attendance').delete().eq('id', req.params.id);

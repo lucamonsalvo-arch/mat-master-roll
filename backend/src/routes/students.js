@@ -24,6 +24,23 @@ router.get('/', requireAuth, async (req, res) => {
   res.json(data);
 });
 
+// GET /api/students/class-enrollments – active enrollments with class type (profesor only)
+router.get('/class-enrollments', requireProfessor, async (req, res) => {
+  const { data, error } = await supabase
+    .from('student_schedules')
+    .select('student_id, schedules(class_type_id, class_types(name))')
+    .eq('active', true);
+  if (error) return res.status(500).json({ error: error.message });
+  const result = (data || [])
+    .map(e => ({
+      student_id:      e.student_id,
+      class_type_id:   e.schedules?.class_type_id,
+      class_type_name: e.schedules?.class_types?.name,
+    }))
+    .filter(e => e.class_type_id);
+  res.json(result);
+});
+
 // GET /api/students/absences-alert – students with 3+ consecutive absences (profesor only)
 router.get('/absences-alert', requireProfessor, async (req, res) => {
   const { data: enrollments } = await supabase
