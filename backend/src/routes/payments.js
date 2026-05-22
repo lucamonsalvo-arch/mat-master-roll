@@ -154,34 +154,80 @@ router.post('/notify-debtors', requireProfessor, async (req, res) => {
   res.json({ notified, debtors: debtors.map(d => d.name) });
 });
 
-// Manual payment registration by professor
+// POST /api/payments/manual – register manual payment (professor only)
 router.post('/manual', requireProfessor, async (req, res) => {
-  const { student_id, amount, concept, month, year } = req.body;
+  const { student_id, amount, concept, month, year, method, status } = req.body;
+  const resolvedStatus = status || 'approved';
   const { data, error } = await supabase
     .from('payments')
     .insert({
       student_id, amount, concept, month, year,
-      status: 'approved',
-      paid_at: new Date().toISOString(),
+      method: method || 'efectivo',
+      status: resolvedStatus,
+      paid_at: resolvedStatus === 'approved' ? new Date().toISOString() : null,
     })
     .select('*, users!payments_student_id_fkey(name,phone)')
     .single();
 
   if (error) return res.status(400).json({ error: error.message });
 
-  await notifyN8n({
-    event: 'payment_approved',
-    student_name: data.users?.name,
-    student_phone: data.users?.phone,
-    professor_phone: process.env.PROFESSOR_PHONE,
-    amount: data.amount,
-    concept: data.concept,
-    month: data.month,
-    year: data.year,
-    paid_at: data.paid_at,
-  });
+  if (resolvedStatus === 'approved') {
+    await notifyN8n({
+      event: 'payment_approved',
+      student_name: data.users?.name,
+      student_phone: data.users?.phone,
+      professor_phone: process.env.PROFESSOR_PHONE,
+      amount: data.amount,
+      concept: data.concept,
+      month: data.month,
+      year: data.year,
+      paid_at: data.paid_at,
+    });
+  }
 
   res.status(201).json(data);
+});
+
+// GET /api/payments/student/:id – full payment history for one student (professor only)
+router.get('/student/:id', requireProfessor, async (req, res) => {
+  const { data, error } = await supabase
+    .from('payments')
+    .select('*, users!payments_student_id_fkey(id,name,dni,belt,stripe)')
+    .eq('student_id', req.params.id)
+    .order('year',  { ascending: false })
+    .order('month', { ascending: false });
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data);
+});
+
+// PUT /api/payments/:id – edit a payment (professor only)
+router.put('/:id', requireProfessor, async (req, res) => {
+  const { amount, concept, month, year, status, method, paid_at } = req.body;
+  const updates = {};
+  if (amount  !== undefined) updates.amount  = amount;
+  if (concept !== undefined) updates.concept = concept;
+  if (month   !== undefined) updates.month   = month;
+  if (year    !== undefined) updates.year    = year;
+  if (method  !== undefined) updates.method  = method;
+  if (status  !== undefined) {
+    updates.status  = status;
+    updates.paid_at = status === 'approved'
+      ? (paid_at || new Date().toISOString())
+      : null;
+  } else if (paid_at !== undefined) {
+    updates.paid_at = paid_at || null;
+  }
+  const { data, error } = await supabase
+    .from('payments').update(updates).eq('id', req.params.id).select().single();
+  if (error) return res.status(400).json({ error: error.message });
+  res.json(data);
+});
+
+// DELETE /api/payments/:id – delete a payment (professor only)
+router.delete('/:id', requireProfessor, async (req, res) => {
+  const { error } = await supabase.from('payments').delete().eq('id', req.params.id);
+  if (error) return res.status(400).json({ error: error.message });
+  res.status(204).send();
 });
 
 async function notifyN8n(payload) {
