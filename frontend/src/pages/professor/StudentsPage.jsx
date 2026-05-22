@@ -1,23 +1,36 @@
 import { useState, useEffect } from 'react';
-import { UserPlus, Search, X, Save } from 'lucide-react';
+import { UserPlus, Search, X, Save, Eye, AlertTriangle } from 'lucide-react';
 import api from '../../lib/api';
 import BeltBadge from '../../components/shared/BeltBadge';
 
-const BELTS  = ['blanco','azul','morado','marron','negro'];
+const MONTHS  = ['','Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const BELTS   = ['blanco','azul','morado','marron','negro'];
 const BELT_PT = { blanco:'Branca', azul:'Azul', morado:'Roxa', marron:'Marrom', negro:'Preta' };
-const GRAUS  = [0,1,2,3,4];
-const EMPTY  = { dni:'', pin:'', name:'', belt:'blanco', stripe:0, phone:'', email:'', birth_date:'' };
+const GRAUS   = [0,1,2,3,4];
+const EMPTY   = { dni:'', pin:'', name:'', belt:'blanco', stripe:0, phone:'', email:'', birth_date:'' };
+const now     = new Date();
 
 export default function StudentsPage() {
-  const [students, setStudents] = useState([]);
-  const [search,   setSearch]   = useState('');
-  const [loading,  setLoading]  = useState(true);
-  const [modal,    setModal]    = useState(null);
-  const [form,     setForm]     = useState(EMPTY);
-  const [saving,   setSaving]   = useState(false);
-  const [error,    setError]    = useState('');
+  const [students,  setStudents]  = useState([]);
+  const [search,    setSearch]    = useState('');
+  const [loading,   setLoading]   = useState(true);
+  const [modal,     setModal]     = useState(null);
+  const [form,      setForm]      = useState(EMPTY);
+  const [saving,    setSaving]    = useState(false);
+  const [error,     setError]     = useState('');
 
-  useEffect(() => { fetchStudents(); }, []);
+  // Absence alerts
+  const [absenceAlerts, setAbsenceAlerts] = useState(new Set());
+
+  // Presencia modal
+  const [presModal,    setPresModal]    = useState(null);
+  const [presRecords,  setPresRecords]  = useState([]);
+  const [presLoading,  setPresLoading]  = useState(false);
+  const [presFilters,  setPresFilters]  = useState({ month: now.getMonth()+1, year: now.getFullYear(), classTypeId: '' });
+  const [classTypes,   setClassTypes]   = useState([]);
+
+  useEffect(() => { fetchStudents(); fetchAbsenceAlerts(); }, []);
+  useEffect(() => { if (presModal) fetchPresencia(); }, [presModal, presFilters.month, presFilters.year]);
 
   async function fetchStudents() {
     try {
@@ -26,23 +39,40 @@ export default function StudentsPage() {
     } finally { setLoading(false); }
   }
 
-  function openCreate() {
-    setForm({ ...EMPTY });
-    setError('');
-    setModal('create');
+  async function fetchAbsenceAlerts() {
+    try {
+      const { data } = await api.get('/api/students/absences-alert');
+      setAbsenceAlerts(new Set(data.map(a => a.student_id)));
+    } catch {}
   }
-  function openEdit(s) { setForm({ ...s, pin:'' }); setError(''); setModal(s); }
+
+  async function fetchPresencia() {
+    setPresLoading(true);
+    try {
+      const { data } = await api.get(`/api/attendance?student_id=${presModal.id}&month=${presFilters.month}&year=${presFilters.year}`);
+      setPresRecords(data || []);
+    } finally { setPresLoading(false); }
+  }
+
+  function openPresencia(student) {
+    setPresModal(student);
+    setPresFilters({ month: now.getMonth()+1, year: now.getFullYear(), classTypeId: '' });
+    setPresRecords([]);
+    if (!classTypes.length) {
+      api.get('/api/schedules/class-types').then(({ data }) => setClassTypes(data || []));
+    }
+  }
+
+  function openCreate() { setForm({ ...EMPTY }); setError(''); setModal('create'); }
+  function openEdit(s)  { setForm({ ...s, pin:'' }); setError(''); setModal(s); }
   function closeModal() { setModal(null); }
 
   async function handleSave(e) {
     e.preventDefault();
     setSaving(true); setError('');
     try {
-      if (modal === 'create') {
-        await api.post('/api/students', form);
-      } else {
-        await api.put(`/api/students/${modal.id}`, form);
-      }
+      if (modal === 'create') await api.post('/api/students', form);
+      else await api.put(`/api/students/${modal.id}`, form);
       await fetchStudents();
       closeModal();
     } catch (err) {
@@ -51,20 +81,27 @@ export default function StudentsPage() {
   }
 
   const filtered = students.filter(s =>
-    s.name.toLowerCase().includes(search.toLowerCase()) ||
-    s.dni.includes(search)
+    s.name.toLowerCase().includes(search.toLowerCase()) || s.dni.includes(search)
   );
+
+  const filteredPres = presFilters.classTypeId
+    ? presRecords.filter(r => r.schedules?.class_type_id === presFilters.classTypeId)
+    : presRecords;
 
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-white">Atletas</h2>
-          <p className="text-gray-400 text-sm">{students.length} atletas registrados</p>
+          <p className="text-gray-400 text-sm">{students.length} atletas registrados
+            {absenceAlerts.size > 0 && (
+              <span className="ml-2 inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full bg-orange-900/40 text-orange-400">
+                <AlertTriangle size={11}/> {absenceAlerts.size} con 3+ faltas
+              </span>
+            )}
+          </p>
         </div>
-        <button
-          type="button"
-          onClick={openCreate}
+        <button type="button" onClick={openCreate}
           className="flex items-center gap-2 bg-red-600 hover:bg-red-500 text-white px-4 py-2.5 rounded-xl font-medium transition-colors">
           <UserPlus size={18}/> Nuevo atleta
         </button>
@@ -97,10 +134,9 @@ export default function StudentsPage() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-gray-800">
-                {['Nombre','DNI','Faixa','Teléfono','Estado'].map(h => (
+                {['Nombre','DNI','Faixa','Teléfono','Estado',''].map(h => (
                   <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">{h}</th>
                 ))}
-                <th className="px-4 py-3"/>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-800">
@@ -111,7 +147,14 @@ export default function StudentsPage() {
                       <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center text-sm font-bold text-white">
                         {s.name[0]}
                       </div>
-                      <span className="font-medium text-white">{s.name}</span>
+                      <div>
+                        <p className="font-medium text-white leading-tight">{s.name}</p>
+                        {absenceAlerts.has(s.id) && (
+                          <span className="inline-flex items-center gap-1 text-xs font-medium px-1.5 py-0.5 rounded-full bg-orange-900/40 text-orange-400 mt-0.5">
+                            <AlertTriangle size={10}/> 3+ faltas consecutivas
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </td>
                   <td className="px-4 py-3 text-gray-400 font-mono text-sm">{s.dni}</td>
@@ -123,10 +166,16 @@ export default function StudentsPage() {
                     </span>
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <button type="button" onClick={() => openEdit(s)}
-                      className="text-gray-400 hover:text-white text-sm underline transition-colors">
-                      Editar
-                    </button>
+                    <div className="flex items-center justify-end gap-3">
+                      <button type="button" onClick={() => openPresencia(s)}
+                        className="flex items-center gap-1 text-gray-400 hover:text-white text-sm transition-colors">
+                        <Eye size={14}/> Presencia
+                      </button>
+                      <button type="button" onClick={() => openEdit(s)}
+                        className="text-gray-400 hover:text-white text-sm underline transition-colors">
+                        Editar
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -135,6 +184,7 @@ export default function StudentsPage() {
         )}
       </div>
 
+      {/* Edit / Create modal */}
       {modal && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50">
           <div className="bg-gray-900 rounded-2xl border border-gray-800 w-full max-w-lg shadow-2xl">
@@ -152,13 +202,11 @@ export default function StudentsPage() {
                 </Field>
                 <Field label="DNI" required={modal==='create'}>
                   <input value={form.dni} onChange={e=>setForm({...form,dni:e.target.value})}
-                    className={INPUT} placeholder="12345678" disabled={modal!=='create'}
-                    required={modal==='create'}/>
+                    className={INPUT} placeholder="12345678" disabled={modal!=='create'} required={modal==='create'}/>
                 </Field>
                 <Field label={modal==='create'?'PIN (4 dígitos)':'Nuevo PIN (vacío = sin cambio)'} required={modal==='create'}>
                   <input type="password" value={form.pin} onChange={e=>setForm({...form,pin:e.target.value.slice(0,4)})}
-                    className={INPUT} placeholder="••••" inputMode="numeric" maxLength={4}
-                    required={modal==='create'}/>
+                    className={INPUT} placeholder="••••" inputMode="numeric" maxLength={4} required={modal==='create'}/>
                 </Field>
                 <Field label="Teléfono">
                   <input value={form.phone||''} onChange={e=>setForm({...form,phone:e.target.value})}
@@ -208,11 +256,102 @@ export default function StudentsPage() {
           </div>
         </div>
       )}
+
+      {/* Presencia modal */}
+      {presModal && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50">
+          <div className="bg-gray-900 rounded-2xl border border-gray-800 w-full max-w-2xl shadow-2xl max-h-[85vh] flex flex-col">
+            {/* Header */}
+            <div className="flex items-center justify-between p-6 border-b border-gray-800">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gray-700 rounded-full flex items-center justify-center text-lg font-bold text-white">
+                  {presModal.name[0]}
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-white">{presModal.name}</h3>
+                  <BeltBadge belt={presModal.belt} stripe={presModal.stripe}/>
+                </div>
+              </div>
+              <button type="button" onClick={()=>setPresModal(null)} className="text-gray-400 hover:text-white"><X size={20}/></button>
+            </div>
+
+            {/* Filters */}
+            <div className="flex flex-wrap gap-2 px-5 py-3 border-b border-gray-800">
+              <select value={presFilters.month} onChange={e=>setPresFilters({...presFilters,month:Number(e.target.value)})}
+                className={INPUT_SM}>
+                {MONTHS.slice(1).map((m,i)=><option key={i+1} value={i+1}>{m}</option>)}
+              </select>
+              <select value={presFilters.year} onChange={e=>setPresFilters({...presFilters,year:Number(e.target.value)})}
+                className={INPUT_SM}>
+                {[2024,2025,2026].map(y=><option key={y} value={y}>{y}</option>)}
+              </select>
+              {classTypes.length > 0 && (
+                <select value={presFilters.classTypeId} onChange={e=>setPresFilters({...presFilters,classTypeId:e.target.value})}
+                  className={INPUT_SM}>
+                  <option value="">Todas las aulas</option>
+                  {classTypes.map(ct=><option key={ct.id} value={ct.id}>{ct.name}</option>)}
+                </select>
+              )}
+            </div>
+
+            {/* Table */}
+            <div className="flex-1 overflow-auto">
+              {presLoading ? (
+                <div className="p-8 text-center text-gray-500">Cargando...</div>
+              ) : filteredPres.length === 0 ? (
+                <div className="p-8 text-center text-gray-500">Sin registros de presencia en este período</div>
+              ) : (
+                <table className="w-full">
+                  <thead className="sticky top-0 bg-gray-900 z-10">
+                    <tr className="border-b border-gray-800">
+                      {['Fecha','Aula','Horario','Marcado por'].map(h=>(
+                        <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-800">
+                    {filteredPres.map(r=>(
+                      <tr key={r.id} className="hover:bg-gray-800/50">
+                        <td className="px-4 py-3 text-white text-sm font-medium">
+                          {new Date(r.class_date + 'T12:00').toLocaleDateString('es-AR', { weekday:'short', day:'2-digit', month:'short', year:'numeric' })}
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-2">
+                            <span className="w-2 h-2 rounded-full flex-shrink-0" style={{backgroundColor: r.schedules?.class_types?.color || '#ef4444'}}/>
+                            <span className="text-sm text-white">{r.schedules?.class_types?.name || '—'}</span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 text-gray-400 text-sm font-mono">
+                          {r.schedules?.start_time?.slice(0,5)} – {r.schedules?.end_time?.slice(0,5)}
+                        </td>
+                        <td className="px-4 py-3 text-gray-400 text-sm">Profesor</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="px-5 py-3 border-t border-gray-800 flex items-center justify-between">
+              <p className="text-gray-400 text-sm">
+                <span className="text-white font-bold">{filteredPres.length}</span> clase{filteredPres.length !== 1 ? 's' : ''} en {MONTHS[presFilters.month]} {presFilters.year}
+              </p>
+              {absenceAlerts.has(presModal.id) && (
+                <span className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full bg-orange-900/30 text-orange-400 border border-orange-800/50">
+                  <AlertTriangle size={12}/> 3+ faltas consecutivas recientes
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
-const INPUT = 'w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2.5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-red-600';
+const INPUT    = 'w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2.5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-red-600';
+const INPUT_SM = 'bg-gray-800 border border-gray-700 rounded-xl px-3 py-2 text-white text-sm focus:outline-none focus:ring-2 focus:ring-red-600';
 
 function Field({ label, required, children }) {
   return (

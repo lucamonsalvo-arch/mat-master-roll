@@ -24,6 +24,66 @@ router.get('/', requireAuth, async (req, res) => {
   res.json(data);
 });
 
+// GET /api/students/absences-alert – students with 3+ consecutive absences (profesor only)
+router.get('/absences-alert', requireProfessor, async (req, res) => {
+  const { data: enrollments } = await supabase
+    .from('student_schedules')
+    .select('student_id, schedule_id, schedules(day_of_week)')
+    .eq('active', true);
+
+  if (!enrollments?.length) return res.json([]);
+
+  // Group by student
+  const byStudent = {};
+  for (const e of enrollments) {
+    if (!byStudent[e.student_id]) byStudent[e.student_id] = [];
+    byStudent[e.student_id].push(e);
+  }
+
+  // Last N occurrences of a weekday (before today)
+  function lastNDates(dow, n) {
+    const dates = [];
+    const d = new Date();
+    d.setDate(d.getDate() - 1); // start yesterday
+    d.setHours(0, 0, 0, 0);
+    while (dates.length < n) {
+      if (d.getDay() === dow) dates.push(d.toISOString().slice(0, 10));
+      d.setDate(d.getDate() - 1);
+    }
+    return dates;
+  }
+
+  // Recent attendance (last 45 days)
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - 45);
+  const { data: att } = await supabase
+    .from('attendance')
+    .select('student_id, schedule_id, class_date')
+    .gte('class_date', cutoff.toISOString().slice(0, 10));
+
+  const attSet = new Set((att || []).map(a => `${a.student_id}_${a.schedule_id}_${a.class_date}`));
+
+  const alerts = [];
+  for (const [studentId, enrolls] of Object.entries(byStudent)) {
+    const expected = [];
+    for (const e of enrolls) {
+      const dow = e.schedules?.day_of_week;
+      if (dow === undefined || dow === null) continue;
+      lastNDates(dow, 10).forEach(date => expected.push({ date, schedule_id: e.schedule_id }));
+    }
+    expected.sort((a, b) => b.date.localeCompare(a.date));
+
+    let consecutive = 0;
+    for (const ex of expected) {
+      if (attSet.has(`${studentId}_${ex.schedule_id}_${ex.date}`)) break;
+      consecutive++;
+    }
+    if (consecutive >= 3) alerts.push({ student_id: studentId, consecutive_absences: consecutive });
+  }
+
+  res.json(alerts);
+});
+
 // GET /api/students/:id
 router.get('/:id', requireAuth, async (req, res) => {
   if (req.user.role !== 'profesor' && req.user.id !== req.params.id) {
