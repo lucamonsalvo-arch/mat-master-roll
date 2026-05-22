@@ -1,17 +1,19 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { Users, CalendarDays, LayoutGrid, DollarSign, ShieldCheck } from 'lucide-react';
+import { Users, CalendarDays, LayoutGrid, DollarSign, ShieldCheck, BarChart2 } from 'lucide-react';
 import Sidebar from '../../components/shared/Sidebar';
 import StudentsPage from './StudentsPage';
 import ClassesPage from './ClassesPage';
 import SchedulesPage from './SchedulesPage';
 import FinancesPage from './FinancesPage';
 import AccessPage from './AccessPage';
+import ReportsPage from './ReportsPage';
 
 const LINKS = [
   { to: '/profesor/alumnos',   icon: Users,        label: 'Atletas'   },
   { to: '/profesor/clases',    icon: LayoutGrid,   label: 'Clases'    },
   { to: '/profesor/horarios',  icon: CalendarDays, label: 'Horarios'  },
   { to: '/profesor/finanzas',  icon: DollarSign,   label: 'Finanzas'  },
+  { to: '/profesor/reportes',  icon: BarChart2,    label: 'Reportes'  },
   { to: '/profesor/accesos',   icon: ShieldCheck,  label: 'Accesos'   },
 ];
 
@@ -29,6 +31,7 @@ export default function ProfessorLayout() {
           <Route path="clases"   element={<ClassesPage />} />
           <Route path="horarios" element={<SchedulesPage />} />
           <Route path="finanzas" element={<FinancesPage />} />
+          <Route path="reportes" element={<ReportsPage />} />
           <Route path="accesos"  element={<AccessPage />} />
           <Route path="*"        element={<Navigate to="alumnos" replace />} />
         </Routes>
