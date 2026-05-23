@@ -5,6 +5,8 @@ import BeltBadge from '../../components/shared/BeltBadge';
 import BeltSelector from '../../components/shared/BeltSelector';
 
 const MONTHS  = ['','Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const BELTS   = ['blanco','azul','morado','marron','negro'];
+const BELT_PT = { blanco:'Branca', azul:'Azul', morado:'Roxa', marron:'Marrom', negro:'Preta' };
 const EMPTY   = { dni:'', pin:'', name:'', belt:'blanco', stripe:0, phone:'', email:'', birth_date:'' };
 const now     = new Date();
 
