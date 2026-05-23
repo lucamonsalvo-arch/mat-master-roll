@@ -44,7 +44,7 @@ export default function Sidebar({ links }) {
       {/* Header */}
       <div className="p-5 border-b border-gray-800 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-red-600 rounded-xl flex items-center justify-center text-xl flex-shrink-0">🥋</div>
+          <img src="/logo.webp" alt="Logo" className="w-10 h-10 rounded-xl flex-shrink-0 object-cover"/>
           <div>
             <h1 className="font-black text-white text-sm leading-tight">Mat Master Roll</h1>
             <p className="text-gray-500 text-xs">{user?.role === 'profesor' ? 'Profesor' : 'Atleta'}</p>
@@ -122,7 +122,7 @@ export default function Sidebar({ links }) {
             <Menu size={22}/>
           </button>
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-red-600 rounded-lg flex items-center justify-center text-base">🥋</div>
+            <img src="/logo.webp" alt="Logo" className="w-7 h-7 rounded-lg object-cover flex-shrink-0"/>
             <span className="font-black text-white text-sm">Mat Master Roll</span>
           </div>
         </div>
