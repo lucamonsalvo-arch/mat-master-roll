@@ -25,7 +25,7 @@ export default function ProfessorLayout() {
       <div className="absolute inset-0 opacity-[0.04] pointer-events-none"
         style={{ backgroundImage: TATAMI, backgroundSize: '80px 80px', backgroundRepeat: 'repeat' }}/>
       <Sidebar links={LINKS} />
-      <main className="flex-1 overflow-auto relative z-10">
+      <main className="flex-1 overflow-auto relative z-10 pt-14 md:pt-0">
         <Routes>
           <Route path="alumnos"  element={<StudentsPage />} />
           <Route path="clases"   element={<ClassesPage />} />

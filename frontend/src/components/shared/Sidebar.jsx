@@ -127,9 +127,6 @@ export default function Sidebar({ links }) {
           </div>
         </div>
 
-        {/* Spacer so content doesn't hide under top bar */}
-        <div className="h-14"/>
-
         {/* Backdrop */}
         {open && (
           <div
