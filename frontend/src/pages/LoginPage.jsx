@@ -36,7 +36,7 @@ export default function LoginPage() {
       <div className="w-full max-w-sm relative z-10">
         {/* Logo */}
         <div className="text-center mb-8">
-          <img src="/logo.webp" alt="Mat Master Roll" className="w-40 h-40 mx-auto mb-4 rounded-full shadow-lg shadow-black/50"/>
+          <img src="/logo.webp" alt="Mat Master Roll" className="w-56 h-56 mx-auto mb-4 rounded-full shadow-lg shadow-black/50"/>
           <h1 className="text-3xl font-black tracking-tight text-white">Mat Master Roll</h1>
           <p className="text-gray-400 mt-1 text-sm">Academia de Jiu Jitsu</p>
         </div>
