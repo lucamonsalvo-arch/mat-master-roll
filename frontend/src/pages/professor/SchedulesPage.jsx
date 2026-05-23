@@ -180,19 +180,17 @@ export default function SchedulesPage() {
                   <div className="p-2 space-y-2 min-h-[120px]">
                     {dayClasses.map(s=>(
                       <div key={s.id}
-                        className="rounded-lg p-2 text-xs transition-all group"
+                        className="rounded-lg p-2 text-xs transition-all"
                         style={{backgroundColor: s.class_types?.color+'22', borderLeft: `3px solid ${s.class_types?.color}`}}>
-                        <div className="flex items-start justify-between gap-1">
-                          <div className="cursor-pointer hover:brightness-125 flex-1" onClick={() => openEdit(s)}>
-                            <p className="font-semibold text-white leading-tight">{s.class_types?.name}</p>
-                            <p className="text-gray-400 mt-0.5">{s.start_time?.slice(0,5)}</p>
-                          </div>
-                          <button type="button"
-                            onClick={() => { setQrModal(s); setQrDate(TODAY); }}
-                            className="text-gray-600 hover:text-white transition-colors flex-shrink-0 mt-0.5">
-                            <QrCode size={12}/>
-                          </button>
+                        <div className="cursor-pointer hover:brightness-125" onClick={() => openEdit(s)}>
+                          <p className="font-semibold text-white leading-tight">{s.class_types?.name}</p>
+                          <p className="text-gray-400 mt-0.5">{s.start_time?.slice(0,5)}</p>
                         </div>
+                        <button type="button"
+                          onClick={() => { setQrModal(s); setQrDate(TODAY); }}
+                          className="mt-2 w-full flex items-center justify-center gap-1 bg-black/30 hover:bg-black/50 text-white rounded-md py-1 transition-colors">
+                          <QrCode size={10}/> <span>QR</span>
+                        </button>
                       </div>
                     ))}
                   </div>
