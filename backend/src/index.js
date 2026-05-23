@@ -14,16 +14,18 @@ const reportsRoutes    = require('./routes/reports');
 
 const app = express();
 
+// Trust Render/proxy X-Forwarded-For so rate limiters use real client IPs
+app.set('trust proxy', 1);
+
 app.use(cors({ origin: process.env.FRONTEND_URL || '*', credentials: true }));
 
 // Raw body needed for MercadoPago webhook signature validation
 app.use('/api/payments/webhook', express.raw({ type: 'application/json' }));
 app.use(express.json());
 
-const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100 });
+const limiter     = rateLimit({ windowMs: 15 * 60 * 1000, max: 300 });
+const authLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 30  });
 app.use('/api/', limiter);
-
-const authLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 20 });
 app.use('/api/auth/login', authLimiter);
 
 app.use('/api/auth',       authRoutes);
