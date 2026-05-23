@@ -19,7 +19,9 @@
       "Bash(git -C /c/Users/Luca/mat-master-roll commit -m 'fix: add pt-14 on mobile so content clears fixed top bar *)",
       "Bash(Get-ChildItem -Path C:\\\\Users\\\\Luca -Recurse -Filter \"bjj-belt-selector.html\" -ErrorAction SilentlyContinue)",
       "Bash(Select-Object FullName)",
-      "Bash(git -C /c/Users/Luca/mat-master-roll add frontend/src/components/shared/BeltSelector.jsx frontend/src/pages/professor/StudentsPage.jsx frontend/src/pages/student/ProfilePage.jsx)"
+      "Bash(git -C /c/Users/Luca/mat-master-roll add frontend/src/components/shared/BeltSelector.jsx frontend/src/pages/professor/StudentsPage.jsx frontend/src/pages/student/ProfilePage.jsx)",
+      "Bash(node -e \"const {QrCode} = require\\('lucide-react'\\); console.log\\(typeof QrCode\\);\")",
+      "Bash(cd *)"
     ]
   }
 }

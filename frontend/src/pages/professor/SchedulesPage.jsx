@@ -283,50 +283,15 @@ export default function SchedulesPage() {
       )}
 
       {/* QR Modal */}
-      {qrModal && (() => {
-        const qrUrl = `${window.location.origin}/check-in?s=${qrModal.id}&d=${qrDate}`;
-        return (
-          <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
-            <div className="bg-gray-900 rounded-2xl border border-gray-800 w-full max-w-sm shadow-2xl">
-              <div className="flex items-center justify-between p-5 border-b border-gray-800">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full" style={{backgroundColor: qrModal.class_types?.color}}/>
-                    <h3 className="font-bold text-white">{qrModal.class_types?.name}</h3>
-                  </div>
-                  <p className="text-gray-500 text-xs mt-0.5">{DAYS[qrModal.day_of_week]} · {qrModal.start_time?.slice(0,5)} – {qrModal.end_time?.slice(0,5)}</p>
-                </div>
-                <button type="button" onClick={()=>setQrModal(null)} className="text-gray-400 hover:text-white"><X size={20}/></button>
-              </div>
-
-              <div className="p-6 space-y-5">
-                {/* Date picker */}
-                <div>
-                  <label className="block text-xs text-gray-400 mb-1.5">Fecha de la clase</label>
-                  <input type="date" value={qrDate} onChange={e=>setQrDate(e.target.value)}
-                    className="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2.5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-red-600"/>
-                </div>
-
-                {/* QR */}
-                <div className="flex justify-center">
-                  <div className="bg-white p-4 rounded-2xl shadow-lg">
-                    <QRCodeSVG value={qrUrl} size={200} level="M"
-                      imageSettings={{ src:'/logo.webp', width:36, height:36, excavate:true }}/>
-                  </div>
-                </div>
-
-                <p className="text-gray-500 text-xs text-center">Los alumnos escanean este QR para registrar su presencia</p>
-
-                <button type="button"
-                  onClick={() => { navigator.clipboard?.writeText(qrUrl); setToast('Link copiado ✓'); setTimeout(()=>setToast(''),2000); }}
-                  className="w-full bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white py-2.5 rounded-xl text-sm font-medium transition-colors">
-                  Copiar link
-                </button>
-              </div>
-            </div>
-          </div>
-        );
-      })()}
+      {qrModal && (
+        <QrModal
+          schedule={qrModal}
+          date={qrDate}
+          onDateChange={setQrDate}
+          onClose={() => setQrModal(null)}
+          onCopy={(url) => { navigator.clipboard?.writeText(url); setToast('Link copiado ✓'); setTimeout(()=>setToast(''),2000); }}
+        />
+      )}
 
       {toast && (
         <div className="fixed bottom-6 right-6 z-50 bg-green-800 border border-green-700 text-green-100 px-5 py-3 rounded-xl shadow-2xl text-sm font-medium">
@@ -338,3 +303,47 @@ export default function SchedulesPage() {
 }
 
 const INPUT = 'w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2.5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-red-600';
+
+function QrModal({ schedule, date, onDateChange, onClose, onCopy }) {
+  const qrUrl = `${window.location.origin}/check-in?s=${schedule.id}&d=${date}`;
+  return (
+    <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
+      <div className="bg-gray-900 rounded-2xl border border-gray-800 w-full max-w-sm shadow-2xl">
+        <div className="flex items-center justify-between p-5 border-b border-gray-800">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full" style={{backgroundColor: schedule.class_types?.color}}/>
+              <h3 className="font-bold text-white">{schedule.class_types?.name}</h3>
+            </div>
+            <p className="text-gray-500 text-xs mt-0.5">
+              {DAYS[schedule.day_of_week]} · {schedule.start_time?.slice(0,5)} – {schedule.end_time?.slice(0,5)}
+            </p>
+          </div>
+          <button type="button" onClick={onClose} className="text-gray-400 hover:text-white"><X size={20}/></button>
+        </div>
+
+        <div className="p-6 space-y-5">
+          <div>
+            <label className="block text-xs text-gray-400 mb-1.5">Fecha de la clase</label>
+            <input type="date" value={date} onChange={e => onDateChange(e.target.value)}
+              className="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2.5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-red-600"/>
+          </div>
+
+          <div className="flex justify-center">
+            <div className="bg-white p-4 rounded-2xl shadow-lg">
+              <QRCodeSVG value={qrUrl} size={220} level="H"
+                imageSettings={{ src:'/logo.webp', width:44, height:44, excavate:true }}/>
+            </div>
+          </div>
+
+          <p className="text-gray-500 text-xs text-center">Los alumnos escanean este QR para registrar su presencia</p>
+
+          <button type="button" onClick={() => onCopy(qrUrl)}
+            className="w-full bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white py-2.5 rounded-xl text-sm font-medium transition-colors">
+            Copiar link
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
