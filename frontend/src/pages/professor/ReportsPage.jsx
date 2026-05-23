@@ -4,7 +4,7 @@ import {
   PieChart, Pie, Legend,
   LineChart, Line, CartesianGrid,
 } from 'recharts';
-import { TrendingUp, TrendingDown, Minus, Users, DollarSign, Activity, Calendar } from 'lucide-react';
+import { TrendingUp, TrendingDown, Minus, Users, DollarSign, Activity, Calendar, Printer } from 'lucide-react';
 import BeltBadge from '../../components/shared/BeltBadge';
 
 const API = import.meta.env.VITE_API_URL;
@@ -129,6 +129,13 @@ export default function ReportsPage() {
           >
             {[2024, 2025, 2026].map(y => <option key={y} value={y}>{y}</option>)}
           </select>
+          <button
+            onClick={() => window.print()}
+            className="flex items-center gap-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white px-3 py-1.5 rounded-lg text-sm transition-colors"
+            title="Imprimir / Exportar PDF"
+          >
+            <Printer size={15}/> PDF
+          </button>
         </div>
       </div>
 

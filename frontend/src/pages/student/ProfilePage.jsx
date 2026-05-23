@@ -6,15 +6,20 @@ import { BeltDisplay, getBeltObj, grauLabel } from '../../components/shared/Belt
 
 export default function ProfilePage() {
   const user = getUser();
-  const [form,    setForm]    = useState({ phone: '', email: '', photo_url: '' });
-  const [loading, setLoading] = useState(true);
-  const [saving,  setSaving]  = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [error,   setError]   = useState('');
+  const [form,        setForm]        = useState({ phone: '', email: '', photo_url: '' });
+  const [loading,     setLoading]     = useState(true);
+  const [saving,      setSaving]      = useState(false);
+  const [success,     setSuccess]     = useState(false);
+  const [error,       setError]       = useState('');
+  const [beltHistory, setBeltHistory] = useState([]);
 
   useEffect(() => {
-    api.get(`/api/students/${user.id}`).then(({ data }) => {
+    Promise.all([
+      api.get(`/api/students/${user.id}`),
+      api.get(`/api/students/${user.id}/belt-history`).catch(() => ({ data: [] })),
+    ]).then(([{ data }, { data: hist }]) => {
       setForm({ phone: data.phone || '', email: data.email || '', photo_url: data.photo_url || '' });
+      setBeltHistory(hist || []);
     }).finally(() => setLoading(false));
   }, []);
 
@@ -102,6 +107,28 @@ export default function ProfilePage() {
           ))}
         </dl>
       </div>
+
+      {/* Belt history */}
+      {beltHistory.length > 0 && (
+        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
+          <h3 className="font-semibold text-white mb-4">Historial de graduaciones</h3>
+          <div className="space-y-0">
+            {beltHistory.map((h, i) => (
+              <div key={h.id} className="flex items-center gap-4 py-3 border-b border-gray-800 last:border-0">
+                <div className="flex-shrink-0">
+                  <BeltDisplay belt={h.belt} stripe={h.stripe}/>
+                </div>
+                <div className="ml-auto text-right">
+                  <p className="text-white text-sm font-medium">
+                    {new Date(h.promoted_at + 'T12:00').toLocaleDateString('es-AR', { day:'2-digit', month:'long', year:'numeric' })}
+                  </p>
+                  {h.notes && <p className="text-gray-500 text-xs mt-0.5">{h.notes}</p>}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

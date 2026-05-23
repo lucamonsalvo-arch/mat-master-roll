@@ -162,6 +162,42 @@ router.put('/:id', requireAuth, async (req, res) => {
   res.json(data);
 });
 
+// GET /api/students/:id/belt-history
+router.get('/:id/belt-history', requireAuth, async (req, res) => {
+  if (req.user.role !== 'profesor' && req.user.id !== req.params.id) {
+    return res.status(403).json({ error: 'Acceso denegado' });
+  }
+  try {
+    const { data } = await supabase
+      .from('belt_history')
+      .select('*')
+      .eq('student_id', req.params.id)
+      .order('promoted_at', { ascending: false });
+    res.json(data || []);
+  } catch { res.json([]); }
+});
+
+// POST /api/students/:id/promote
+router.post('/:id/promote', requireProfessor, async (req, res) => {
+  const { belt, stripe, notes, promoted_at } = req.body;
+  if (!belt) return res.status(400).json({ error: 'Faixa requerida' });
+
+  const [userRes, histRes] = await Promise.all([
+    supabase.from('users')
+      .update({ belt, stripe: stripe || 0 })
+      .eq('id', req.params.id)
+      .select('id,name,belt,stripe')
+      .single(),
+    supabase.from('belt_history')
+      .insert({ student_id: req.params.id, belt, stripe: stripe || 0, notes: notes || null, promoted_at: promoted_at || new Date().toISOString().slice(0, 10) })
+      .select()
+      .single(),
+  ]);
+
+  if (userRes.error) return res.status(400).json({ error: userRes.error.message });
+  res.status(201).json({ student: userRes.data, history: histRes.data });
+});
+
 // GET /api/students/:id/schedules – enrolled classes
 router.get('/:id/schedules', requireAuth, async (req, res) => {
   if (req.user.role !== 'profesor' && req.user.id !== req.params.id) {

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { UserPlus, Search, X, Save, Eye, Pencil, Trash2, Check } from 'lucide-react';
+import { UserPlus, Search, X, Save, Eye, Pencil, Trash2, Check, GraduationCap } from 'lucide-react';
 import api from '../../lib/api';
 import BeltBadge from '../../components/shared/BeltBadge';
 import BeltSelector from '../../components/shared/BeltSelector';
@@ -26,6 +26,11 @@ export default function StudentsPage() {
   const [enrollmentMap,  setEnrollmentMap]  = useState({});  // studentId -> Set<classTypeName>
   const [debtorIds,      setDebtorIds]      = useState(new Set());
   const [classOptions,   setClassOptions]   = useState([]);
+
+  // Promotion modal
+  const [promModal,  setPromModal]  = useState(null);
+  const [promForm,   setPromForm]   = useState({ belt:'blanco', stripe:0, notes:'', promoted_at:'' });
+  const [promSaving, setPromSaving] = useState(false);
 
   // Presencia modal
   const [presModal,   setPresModal]   = useState(null);
@@ -112,6 +117,23 @@ export default function StudentsPage() {
     } catch (err) {
       alert(err.response?.data?.error || 'Error al editar');
     } finally { setAttSaving(false); }
+  }
+
+  function openPromotion(s) {
+    setPromForm({ belt: s.belt, stripe: s.stripe, notes: '', promoted_at: new Date().toISOString().slice(0,10) });
+    setPromModal(s);
+  }
+
+  async function handlePromote(e) {
+    e.preventDefault();
+    setPromSaving(true);
+    try {
+      const { data } = await api.post(`/api/students/${promModal.id}/promote`, promForm);
+      setStudents(prev => prev.map(s => s.id === promModal.id ? { ...s, belt: data.student.belt, stripe: data.student.stripe } : s));
+      setPromModal(null);
+    } catch (err) {
+      alert(err.response?.data?.error || 'Error al graduar');
+    } finally { setPromSaving(false); }
   }
 
   function openCreate() { setForm({ ...EMPTY }); setError(''); setModal('create'); }
@@ -266,6 +288,10 @@ export default function StudentsPage() {
                           className="flex items-center gap-1 text-gray-400 hover:text-white text-sm transition-colors">
                           <Eye size={14}/> Presencia
                         </button>
+                        <button type="button" onClick={() => openPromotion(s)}
+                          className="text-gray-400 hover:text-yellow-400 transition-colors" title="Graduar">
+                          <GraduationCap size={16}/>
+                        </button>
                         <button type="button" onClick={() => openEdit(s)}
                           className="text-gray-400 hover:text-white text-sm underline transition-colors">
                           Editar
@@ -345,6 +371,48 @@ export default function StudentsPage() {
                 <button type="submit" disabled={saving}
                   className="flex-1 flex items-center justify-center gap-2 bg-red-600 hover:bg-red-500 disabled:opacity-50 text-white py-2.5 rounded-xl font-medium transition-colors">
                   <Save size={16}/> {saving ? 'Guardando...' : 'Guardar'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Promotion modal */}
+      {promModal && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50">
+          <div className="bg-gray-900 rounded-2xl border border-gray-800 w-full max-w-md shadow-2xl">
+            <div className="flex items-center justify-between p-6 border-b border-gray-800">
+              <div>
+                <h3 className="font-bold text-white flex items-center gap-2"><GraduationCap size={18} className="text-yellow-400"/> Graduar atleta</h3>
+                <p className="text-gray-400 text-sm mt-0.5">{promModal.name}</p>
+              </div>
+              <button type="button" onClick={() => setPromModal(null)} className="text-gray-400 hover:text-white"><X size={20}/></button>
+            </div>
+            <form onSubmit={handlePromote} className="p-6 space-y-4">
+              <BeltSelector
+                belt={promForm.belt}
+                stripe={promForm.stripe}
+                onChange={(belt, stripe) => setPromForm(f => ({ ...f, belt, stripe }))}
+              />
+              <div>
+                <label className="block text-xs text-gray-400 mb-1">Fecha de graduación</label>
+                <input type="date" value={promForm.promoted_at} onChange={e => setPromForm({...promForm, promoted_at: e.target.value})}
+                  className={INPUT} required/>
+              </div>
+              <div>
+                <label className="block text-xs text-gray-400 mb-1">Notas (opcional)</label>
+                <textarea value={promForm.notes} onChange={e => setPromForm({...promForm, notes: e.target.value})}
+                  className={INPUT + ' resize-none'} rows={2} placeholder="Observaciones de la graduación..."/>
+              </div>
+              <div className="flex gap-3 pt-1">
+                <button type="button" onClick={() => setPromModal(null)}
+                  className="flex-1 bg-gray-800 hover:bg-gray-700 text-white py-2.5 rounded-xl font-medium transition-colors">
+                  Cancelar
+                </button>
+                <button type="submit" disabled={promSaving}
+                  className="flex-1 flex items-center justify-center gap-2 bg-yellow-600 hover:bg-yellow-500 disabled:opacity-50 text-white py-2.5 rounded-xl font-medium transition-colors">
+                  <GraduationCap size={16}/> {promSaving ? 'Graduando...' : 'Confirmar'}
                 </button>
               </div>
             </form>

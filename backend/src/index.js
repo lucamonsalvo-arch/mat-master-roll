@@ -10,7 +10,8 @@ const attendanceRoutes = require('./routes/attendance');
 const paymentsRoutes   = require('./routes/payments');
 const financesRoutes   = require('./routes/finances');
 const accessRoutes     = require('./routes/access');
-const reportsRoutes    = require('./routes/reports');
+const reportsRoutes       = require('./routes/reports');
+const announcementsRoutes = require('./routes/announcements');
 
 const app = express();
 
@@ -35,7 +36,8 @@ app.use('/api/attendance', attendanceRoutes);
 app.use('/api/payments',   paymentsRoutes);
 app.use('/api/finances',   financesRoutes);
 app.use('/api/access',     accessRoutes);
-app.use('/api/reports',   reportsRoutes);
+app.use('/api/reports',        reportsRoutes);
+app.use('/api/announcements',  announcementsRoutes);
 
 app.get('/health', (_, res) => res.json({ status: 'ok', ts: new Date() }));
 
