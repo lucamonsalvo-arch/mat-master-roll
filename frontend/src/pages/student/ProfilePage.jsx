@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Save, User } from 'lucide-react';
 import api from '../../lib/api';
 import { getUser, setAuth, getToken } from '../../lib/auth';
-import BeltBadge from '../../components/shared/BeltBadge';
+import { BeltDisplay, getBeltObj, grauLabel } from '../../components/shared/BeltSelector';
 
 export default function ProfilePage() {
   const user = getUser();
@@ -41,15 +41,17 @@ export default function ProfilePage() {
       </div>
 
       {/* Avatar & belt */}
-      <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 flex items-center gap-5">
-        <div className="w-16 h-16 bg-gray-700 rounded-2xl flex items-center justify-center text-2xl font-black text-white flex-shrink-0">
-          {user.name?.[0]}
+      <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-4">
+        <div className="flex items-center gap-4">
+          <div className="w-16 h-16 bg-gray-700 rounded-2xl flex items-center justify-center text-2xl font-black text-white flex-shrink-0">
+            {user.name?.[0]}
+          </div>
+          <div>
+            <h3 className="text-xl font-bold text-white">{user.name}</h3>
+            <p className="text-gray-400 text-sm">DNI {user.dni}</p>
+          </div>
         </div>
-        <div>
-          <h3 className="text-xl font-bold text-white">{user.name}</h3>
-          <p className="text-gray-400 text-sm mb-2">DNI {user.dni}</p>
-          <BeltBadge belt={user.belt} stripe={user.stripe}/>
-        </div>
+        <BeltDisplay belt={user.belt} stripe={user.stripe}/>
       </div>
 
       {/* Editable fields */}
@@ -91,7 +93,7 @@ export default function ProfilePage() {
         <dl className="space-y-2">
           {[
             ['Fecha de ingreso', user.join_date ? new Date(user.join_date).toLocaleDateString('es-AR') : '—'],
-            ['Cinturón', `${user.belt || 'blanco'} ${user.stripe ? '★'.repeat(user.stripe) : ''}`],
+            ['Faixa', (() => { const b = getBeltObj(user.belt); return `${b.name}${user.stripe ? ` · ${grauLabel(b, user.stripe)}` : ''}`; })()],
           ].map(([k,v]) => (
             <div key={k} className="flex items-center justify-between py-2 border-b border-gray-800 last:border-0">
               <dt className="text-gray-400 text-sm">{k}</dt>

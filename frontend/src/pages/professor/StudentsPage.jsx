@@ -2,11 +2,9 @@ import { useState, useEffect } from 'react';
 import { UserPlus, Search, X, Save, Eye, Pencil, Trash2, Check } from 'lucide-react';
 import api from '../../lib/api';
 import BeltBadge from '../../components/shared/BeltBadge';
+import BeltSelector from '../../components/shared/BeltSelector';
 
 const MONTHS  = ['','Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-const BELTS   = ['blanco','azul','morado','marron','negro'];
-const BELT_PT = { blanco:'Branca', azul:'Azul', morado:'Roxa', marron:'Marrom', negro:'Preta' };
-const GRAUS   = [0,1,2,3,4];
 const EMPTY   = { dni:'', pin:'', name:'', belt:'blanco', stripe:0, phone:'', email:'', birth_date:'' };
 const now     = new Date();
 
@@ -283,14 +281,14 @@ export default function StudentsPage() {
       {/* Edit / Create modal */}
       {modal && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50">
-          <div className="bg-gray-900 rounded-2xl border border-gray-800 w-full max-w-lg shadow-2xl">
+          <div className="bg-gray-900 rounded-2xl border border-gray-800 w-full max-w-xl shadow-2xl">
             <div className="flex items-center justify-between p-6 border-b border-gray-800">
               <h3 className="text-lg font-bold text-white">
                 {modal === 'create' ? 'Nuevo atleta' : `Editar: ${modal.name}`}
               </h3>
               <button type="button" onClick={closeModal} className="text-gray-400 hover:text-white"><X size={20}/></button>
             </div>
-            <form onSubmit={handleSave} className="p-6 space-y-4">
+            <form onSubmit={handleSave} className="p-6 space-y-4 overflow-y-auto max-h-[80vh]">
               <div className="grid grid-cols-2 gap-4">
                 <Field label="Nombre completo" required>
                   <input value={form.name} onChange={e=>setForm({...form,name:e.target.value})}
@@ -316,16 +314,15 @@ export default function StudentsPage() {
                   <input type="date" value={form.birth_date||''} onChange={e=>setForm({...form,birth_date:e.target.value})}
                     className={INPUT}/>
                 </Field>
-                <Field label="Faixa">
-                  <select value={form.belt} onChange={e=>setForm({...form,belt:e.target.value})} className={INPUT}>
-                    {BELTS.map(b=><option key={b} value={b}>{BELT_PT[b]}</option>)}
-                  </select>
-                </Field>
-                <Field label="Graus">
-                  <select value={form.stripe} onChange={e=>setForm({...form,stripe:Number(e.target.value)})} className={INPUT}>
-                    {GRAUS.map(g=><option key={g} value={g}>{g}</option>)}
-                  </select>
-                </Field>
+              </div>
+
+              {/* Belt selector */}
+              <div className="border-t border-gray-800 pt-4">
+                <BeltSelector
+                  belt={form.belt}
+                  stripe={form.stripe}
+                  onChange={(belt, stripe) => setForm(f => ({ ...f, belt, stripe }))}
+                />
               </div>
 
               {modal !== 'create' && (
