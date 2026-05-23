@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Plus, X, Save, List, LayoutGrid, Pencil } from 'lucide-react';
+import { Plus, X, Save, List, LayoutGrid, Pencil, QrCode } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 import api from '../../lib/api';
+
+const TODAY = new Date().toISOString().slice(0, 10);
 
 const DAYS       = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
 const DAYS_SHORT = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
@@ -16,6 +19,8 @@ export default function SchedulesPage() {
   const [saving,     setSaving]     = useState(false);
   const [error,      setError]      = useState('');
   const [toast,      setToast]      = useState('');
+  const [qrModal,    setQrModal]    = useState(null);
+  const [qrDate,     setQrDate]     = useState(TODAY);
 
   useEffect(() => { load(); }, []);
 
@@ -132,13 +137,19 @@ export default function SchedulesPage() {
                     <td className="px-4 py-3 text-gray-400 text-sm font-mono">{s.start_time?.slice(0,5)} – {s.end_time?.slice(0,5)}</td>
                     <td className="px-4 py-3 text-gray-400 text-sm">{s.location}</td>
                     <td className="px-4 py-3 text-gray-400 text-sm">{s.users?.name || '—'}</td>
-                    <td className="px-4 py-3 text-right flex items-center justify-end gap-3">
-                      <button type="button" onClick={()=>openEdit(s)} className="text-gray-400 hover:text-white text-sm transition-colors flex items-center gap-1">
-                        <Pencil size={14}/> Editar
-                      </button>
-                      <button type="button" onClick={()=>deleteSchedule(s.id)} className="text-gray-500 hover:text-red-400 text-sm transition-colors">
-                        Eliminar
-                      </button>
+                    <td className="px-4 py-3 text-right">
+                      <div className="flex items-center justify-end gap-3">
+                        <button type="button" onClick={()=>{ setQrModal(s); setQrDate(TODAY); }}
+                          className="text-gray-400 hover:text-white text-sm transition-colors flex items-center gap-1">
+                          <QrCode size={14}/> QR
+                        </button>
+                        <button type="button" onClick={()=>openEdit(s)} className="text-gray-400 hover:text-white text-sm transition-colors flex items-center gap-1">
+                          <Pencil size={14}/> Editar
+                        </button>
+                        <button type="button" onClick={()=>deleteSchedule(s.id)} className="text-gray-500 hover:text-red-400 text-sm transition-colors">
+                          Eliminar
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -169,11 +180,19 @@ export default function SchedulesPage() {
                   <div className="p-2 space-y-2 min-h-[120px]">
                     {dayClasses.map(s=>(
                       <div key={s.id}
-                        onClick={() => openEdit(s)}
-                        className="rounded-lg p-2 text-xs cursor-pointer hover:brightness-125 transition-all"
+                        className="rounded-lg p-2 text-xs transition-all group"
                         style={{backgroundColor: s.class_types?.color+'22', borderLeft: `3px solid ${s.class_types?.color}`}}>
-                        <p className="font-semibold text-white leading-tight">{s.class_types?.name}</p>
-                        <p className="text-gray-400 mt-0.5">{s.start_time?.slice(0,5)}</p>
+                        <div className="flex items-start justify-between gap-1">
+                          <div className="cursor-pointer hover:brightness-125 flex-1" onClick={() => openEdit(s)}>
+                            <p className="font-semibold text-white leading-tight">{s.class_types?.name}</p>
+                            <p className="text-gray-400 mt-0.5">{s.start_time?.slice(0,5)}</p>
+                          </div>
+                          <button type="button"
+                            onClick={() => { setQrModal(s); setQrDate(TODAY); }}
+                            className="text-gray-600 hover:text-white transition-colors flex-shrink-0 mt-0.5">
+                            <QrCode size={12}/>
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -262,6 +281,52 @@ export default function SchedulesPage() {
           </div>
         </div>
       )}
+
+      {/* QR Modal */}
+      {qrModal && (() => {
+        const qrUrl = `${window.location.origin}/check-in?s=${qrModal.id}&d=${qrDate}`;
+        return (
+          <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
+            <div className="bg-gray-900 rounded-2xl border border-gray-800 w-full max-w-sm shadow-2xl">
+              <div className="flex items-center justify-between p-5 border-b border-gray-800">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full" style={{backgroundColor: qrModal.class_types?.color}}/>
+                    <h3 className="font-bold text-white">{qrModal.class_types?.name}</h3>
+                  </div>
+                  <p className="text-gray-500 text-xs mt-0.5">{DAYS[qrModal.day_of_week]} · {qrModal.start_time?.slice(0,5)} – {qrModal.end_time?.slice(0,5)}</p>
+                </div>
+                <button type="button" onClick={()=>setQrModal(null)} className="text-gray-400 hover:text-white"><X size={20}/></button>
+              </div>
+
+              <div className="p-6 space-y-5">
+                {/* Date picker */}
+                <div>
+                  <label className="block text-xs text-gray-400 mb-1.5">Fecha de la clase</label>
+                  <input type="date" value={qrDate} onChange={e=>setQrDate(e.target.value)}
+                    className="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2.5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-red-600"/>
+                </div>
+
+                {/* QR */}
+                <div className="flex justify-center">
+                  <div className="bg-white p-4 rounded-2xl shadow-lg">
+                    <QRCodeSVG value={qrUrl} size={200} level="M"
+                      imageSettings={{ src:'/logo.webp', width:36, height:36, excavate:true }}/>
+                  </div>
+                </div>
+
+                <p className="text-gray-500 text-xs text-center">Los alumnos escanean este QR para registrar su presencia</p>
+
+                <button type="button"
+                  onClick={() => { navigator.clipboard?.writeText(qrUrl); setToast('Link copiado ✓'); setTimeout(()=>setToast(''),2000); }}
+                  className="w-full bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white py-2.5 rounded-xl text-sm font-medium transition-colors">
+                  Copiar link
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {toast && (
         <div className="fixed bottom-6 right-6 z-50 bg-green-800 border border-green-700 text-green-100 px-5 py-3 rounded-xl shadow-2xl text-sm font-medium">

@@ -52,6 +52,46 @@ router.post('/', requireProfessor, async (req, res) => {
   res.status(201).json(data);
 });
 
+// POST /api/attendance/checkin – student self check-in via QR
+router.post('/checkin', requireAuth, async (req, res) => {
+  if (req.user.role !== 'alumno') {
+    return res.status(403).json({ error: 'Solo los alumnos pueden hacer check-in' });
+  }
+  const { schedule_id, class_date } = req.body;
+  if (!schedule_id || !class_date) {
+    return res.status(400).json({ error: 'schedule_id y class_date requeridos' });
+  }
+
+  const { data: schedule } = await supabase
+    .from('schedules')
+    .select('id, class_types(name, color)')
+    .eq('id', schedule_id)
+    .eq('active', true)
+    .single();
+  if (!schedule) return res.status(404).json({ error: 'Clase no encontrada' });
+
+  const { data: existing } = await supabase
+    .from('attendance')
+    .select('id')
+    .eq('student_id', req.user.id)
+    .eq('schedule_id', schedule_id)
+    .eq('class_date', class_date)
+    .maybeSingle();
+
+  if (existing) {
+    return res.json({ success: true, already_checked_in: true, schedule });
+  }
+
+  const { data, error } = await supabase
+    .from('attendance')
+    .insert({ student_id: req.user.id, schedule_id, class_date, marked_by: req.user.id })
+    .select('*, schedules(class_types(name, color))')
+    .single();
+
+  if (error) return res.status(400).json({ error: error.message });
+  res.json({ success: true, already_checked_in: false, record: data, schedule });
+});
+
 // POST /api/attendance/bulk  – mark multiple at once
 router.post('/bulk', requireProfessor, async (req, res) => {
   const { student_ids, schedule_id, class_date } = req.body;

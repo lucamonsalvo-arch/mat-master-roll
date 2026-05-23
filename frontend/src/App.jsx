@@ -3,6 +3,7 @@ import { getUser } from './lib/auth';
 import LoginPage from './pages/LoginPage';
 import ProfessorLayout from './pages/professor/ProfessorLayout';
 import StudentLayout from './pages/student/StudentLayout';
+import CheckInPage from './pages/CheckInPage';
 
 function PrivateRoute({ children, role }) {
   const user = getUser();
@@ -24,6 +25,7 @@ export default function App() {
         <Route path="/alumno/*" element={
           <PrivateRoute role="alumno"><StudentLayout /></PrivateRoute>
         } />
+        <Route path="/check-in" element={<CheckInPage />} />
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>

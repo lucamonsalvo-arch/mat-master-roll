@@ -17,7 +17,14 @@ export default function LoginPage() {
     try {
       const { data } = await api.post('/api/auth/login', { dni, pin });
       setAuth(data.token, data.user);
-      navigate(data.user.role === 'profesor' ? '/profesor' : '/alumno', { replace: true });
+      const pending = localStorage.getItem('mmr-checkin');
+      if (pending && data.user.role === 'alumno') {
+        const { schedule_id, class_date } = JSON.parse(pending);
+        localStorage.removeItem('mmr-checkin');
+        navigate(`/check-in?s=${schedule_id}&d=${class_date}`, { replace: true });
+      } else {
+        navigate(data.user.role === 'profesor' ? '/profesor' : '/alumno', { replace: true });
+      }
     } catch (err) {
       setError(err.response?.data?.error || 'Error al iniciar sesión');
     } finally {

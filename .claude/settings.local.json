@@ -3,7 +3,23 @@
     "allow": [
       "Bash(git add *)",
       "Bash(git commit -m ' *)",
-      "Bash(git push *)"
+      "Bash(git push *)",
+      "Bash(git commit -m 'fix: better tatami pattern — 8 rects alternating H/V per quadrant *)",
+      "Bash(git commit -m 'feat: tatami pattern in app layouts + belt bar with stripe marks in BeltBadge *)",
+      "Bash(git commit -m 'feat: payment history — manual register, edit, delete, per-atleta view *)",
+      "Bash(npm install *)",
+      "Bash(git commit *)",
+      "Bash(curl -s -X POST https://mat-master-roll-backendof.onrender.com/api/auth/login -H 'Content-Type: application/json' -d '{\"dni\":\"00000001\",\"pin\":\"1234\"}')",
+      "Bash(git -C /c/Users/Luca/mat-master-roll add backend/src/index.js)",
+      "Bash(git -C /c/Users/Luca/mat-master-roll commit -m ' *)",
+      "Bash(git -C /c/Users/Luca/mat-master-roll push origin main)",
+      "Bash(npm run *)",
+      "Bash(git -C /c/Users/Luca/mat-master-roll add frontend/index.html frontend/tailwind.config.js frontend/src/index.css frontend/src/components/shared/Sidebar.jsx frontend/src/pages/professor/StudentsPage.jsx)",
+      "Bash(git -C /c/Users/Luca/mat-master-roll add frontend/src/pages/professor/ProfessorLayout.jsx frontend/src/pages/student/StudentLayout.jsx frontend/src/components/shared/Sidebar.jsx)",
+      "Bash(git -C /c/Users/Luca/mat-master-roll commit -m 'fix: add pt-14 on mobile so content clears fixed top bar *)",
+      "Bash(Get-ChildItem -Path C:\\\\Users\\\\Luca -Recurse -Filter \"bjj-belt-selector.html\" -ErrorAction SilentlyContinue)",
+      "Bash(Select-Object FullName)",
+      "Bash(git -C /c/Users/Luca/mat-master-roll add frontend/src/components/shared/BeltSelector.jsx frontend/src/pages/professor/StudentsPage.jsx frontend/src/pages/student/ProfilePage.jsx)"
     ]
   }
 }
