@@ -1,13 +1,29 @@
 import { useState, useEffect } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Sun, Moon } from 'lucide-react';
 import { clearAuth, getUser } from '../../lib/auth';
+
+function isDarkMode() {
+  return document.documentElement.classList.contains('dark');
+}
+function applyTheme(dark) {
+  if (dark) document.documentElement.classList.add('dark');
+  else       document.documentElement.classList.remove('dark');
+  try { localStorage.setItem('mmr-theme', dark ? 'dark' : 'light'); } catch {}
+}
 
 export default function Sidebar({ links }) {
   const navigate  = useNavigate();
   const location  = useLocation();
   const user      = getUser();
-  const [open, setOpen] = useState(false);
+  const [open,   setOpen]   = useState(false);
+  const [dark,   setDark]   = useState(isDarkMode);
+
+  function toggleTheme() {
+    const next = !dark;
+    applyTheme(next);
+    setDark(next);
+  }
 
   // Close drawer on route change (mobile)
   useEffect(() => { setOpen(false); }, [location.pathname]);
@@ -70,6 +86,16 @@ export default function Sidebar({ links }) {
             <p className="text-sm font-medium text-white truncate">{user?.name}</p>
             <p className="text-xs text-gray-500">DNI {user?.dni}</p>
           </div>
+        </div>
+        <div className="flex gap-2 mb-1">
+          <button
+            onClick={toggleTheme}
+            className="flex items-center gap-1.5 px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-gray-800 rounded-xl transition-colors flex-1"
+            title={dark ? 'Modo claro' : 'Modo oscuro'}
+          >
+            {dark ? <Sun size={15}/> : <Moon size={15}/>}
+            {dark ? 'Modo claro' : 'Modo oscuro'}
+          </button>
         </div>
         <button
           onClick={logout}

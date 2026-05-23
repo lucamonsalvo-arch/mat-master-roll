@@ -155,7 +155,7 @@ export default function StudentsPage() {
   return (
     <div className="p-6 space-y-4">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="text-2xl font-bold text-white">Atletas</h2>
           <p className="text-gray-400 text-sm">
@@ -165,7 +165,7 @@ export default function StudentsPage() {
           </p>
         </div>
         <button type="button" onClick={openCreate}
-          className="flex items-center gap-2 bg-red-600 hover:bg-red-500 text-white px-4 py-2.5 rounded-xl font-medium transition-colors">
+          className="flex items-center gap-2 bg-red-600 hover:bg-red-500 text-white px-4 py-2.5 rounded-xl font-medium transition-colors flex-shrink-0">
           <UserPlus size={18}/> Nuevo atleta
         </button>
       </div>
