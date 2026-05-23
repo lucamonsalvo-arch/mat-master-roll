@@ -305,39 +305,44 @@ const INPUT = 'w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2.5 
 function QrModal({ schedule, date, onDateChange, onClose, onCopy }) {
   const qrUrl = `${window.location.origin}/check-in?s=${schedule.id}&d=${date}`;
   return (
-    <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
-      <div className="bg-gray-900 rounded-2xl border border-gray-800 w-full max-w-sm shadow-2xl">
-        <div className="flex items-center justify-between p-5 border-b border-gray-800">
+    <div className="fixed inset-0 z-50 flex flex-col bg-gray-950 md:bg-black/80 md:items-center md:justify-center md:p-4">
+      <div className="flex flex-col h-full md:h-auto md:rounded-2xl md:border md:border-gray-800 w-full md:max-w-sm bg-gray-950 md:bg-gray-900 shadow-2xl overflow-hidden">
+
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 pt-12 pb-4 md:pt-5 md:pb-4 md:border-b md:border-gray-800">
           <div>
             <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full" style={{backgroundColor: schedule.class_types?.color}}/>
-              <h3 className="font-bold text-white">{schedule.class_types?.name}</h3>
+              <span className="w-3 h-3 rounded-full" style={{backgroundColor: schedule.class_types?.color}}/>
+              <h3 className="font-black text-white text-lg">{schedule.class_types?.name}</h3>
             </div>
-            <p className="text-gray-500 text-xs mt-0.5">
+            <p className="text-gray-500 text-sm mt-0.5">
               {DAYS[schedule.day_of_week]} · {schedule.start_time?.slice(0,5)} – {schedule.end_time?.slice(0,5)}
             </p>
           </div>
-          <button type="button" onClick={onClose} className="text-gray-400 hover:text-white"><X size={20}/></button>
+          <button type="button" onClick={onClose}
+            className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-800 text-gray-400 hover:text-white">
+            <X size={20}/>
+          </button>
         </div>
 
-        <div className="p-6 space-y-5">
+        {/* QR — ocupa el centro */}
+        <div className="flex-1 flex flex-col items-center justify-center gap-4 px-6">
+          <div className="bg-white p-5 rounded-3xl shadow-2xl">
+            <QRCodeSVG value={qrUrl} size={260} level="H"
+              imageSettings={{ src:'/logo.webp', width:52, height:52, excavate:true }}/>
+          </div>
+          <p className="text-gray-500 text-sm text-center">Escaneá para registrar tu presencia</p>
+        </div>
+
+        {/* Footer */}
+        <div className="px-5 pb-10 md:pb-5 pt-4 border-t border-gray-800 space-y-3">
           <div>
-            <label className="block text-xs text-gray-400 mb-1.5">Fecha de la clase</label>
+            <label className="block text-xs text-gray-500 mb-1.5">Fecha de la clase</label>
             <input type="date" value={date} onChange={e => onDateChange(e.target.value)}
-              className="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2.5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-red-600"/>
+              className="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-3 text-white text-sm focus:outline-none focus:ring-2 focus:ring-red-600"/>
           </div>
-
-          <div className="flex justify-center">
-            <div className="bg-white p-4 rounded-2xl shadow-lg">
-              <QRCodeSVG value={qrUrl} size={220} level="H"
-                imageSettings={{ src:'/logo.webp', width:44, height:44, excavate:true }}/>
-            </div>
-          </div>
-
-          <p className="text-gray-500 text-xs text-center">Los alumnos escanean este QR para registrar su presencia</p>
-
           <button type="button" onClick={() => onCopy(qrUrl)}
-            className="w-full bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white py-2.5 rounded-xl text-sm font-medium transition-colors">
+            className="w-full bg-gray-800 active:bg-gray-700 text-gray-300 py-3 rounded-xl text-sm font-semibold transition-colors">
             Copiar link
           </button>
         </div>
